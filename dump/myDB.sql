@@ -55,18 +55,16 @@ CREATE TABLE `Vanzator` (
 	FOREIGN KEY (IDUtilizator) REFERENCES Utilizator(IDUtilizator)
 );
 
-#-- Tabela Telefoane puse la licitatie ( Utilizator 1:N Telefon )
+#-- Tabela Telefoane puse la licitatie ( Utilizator/Vanzator 1:N Telefon )
 CREATE TABLE `Telefon` (
 	`IDTelefon` INT unsigned NOT NULL AUTO_INCREMENT,
 	`IDUtilizator` INT unsigned NOT NULL, #-- Vanzator
-	`NumarTelefoane` INT unsigned DEFAULT 1,
 	`Nume` VARCHAR(50) NOT NULL,
 	`PretInitial` DECIMAL(10,2) NOT NULL, 
 	`AnAparitie` CHAR(4) NOT NULL,
 	`Specificatii` VARCHAR(500),
 	`DataLicitiatie` DATETIME DEFAULT NOW(),
 	`Vandut` BOOL DEFAULT False,
-	`LicitatiiPublice` BOOL DEFAULT True,
 	
 	PRIMARY KEY (IDTelefon),
 	FOREIGN KEY (IDUtilizator) REFERENCES Utilizator(IDUtilizator)
@@ -77,9 +75,8 @@ CREATE TABLE `Licitatie` (
 	`IDLicitatie` INT unsigned NOT NULL AUTO_INCREMENT,
 	`IDUtilizator` INT unsigned NOT NULL, #-- Cumparator
 	`IDTelefon` INT unsigned NOT NULL,
-	`PretPerTelefon` DECIMAL(10,2) NOT NULL,
+	`PretLicitat` DECIMAL(10,2) NOT NULL,
 	`DataLicitatie` DATETIME DEFAULT NOW(), 
-	`NumarTelefoaneLicitate` INT unsigned DEFAULT 1,
 	`Finalizata` BOOL DEFAULT False,
 	
 	PRIMARY KEY (IDLicitatie), #-- Un utilizator poate avea mai multe licitatii
