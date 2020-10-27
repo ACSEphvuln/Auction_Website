@@ -11,27 +11,13 @@ CREATE DATABASE myDb;
 
 USE myDb;
 
+
 #--Tabela informatii referitoare la contul de login.
 CREATE TABLE `Utilizator` (
 	`IDUtilizator` INT unsigned NOT NULL AUTO_INCREMENT,
 	`Email` VARCHAR(50) NOT NULL,
-	`Parola` CHAR(64) NOT NULL, #-- SHA256SUM (SALT="TeleShop") 
+	`Parola` CHAR(64) NOT NULL,
 	PRIMARY KEY (`IDUtilizator`)
-);
-
-#--Tablea Cumparatori (1:1 Utilizator, 1:1 Card)
-CREATE TABLE `Persoana` (
-	`IDUtilizator` INT unsigned NOT NULL,
-	`IDCard` INT unsigned,
-	`Nume` VARCHAR(50) NOT NULL,
-	`Prenume` VARCHAR(50) NOT NULL,
-	`CNP` CHAR(13) NOT NULL,
-	`Sex` CHAR(1) DEFAULT 'M',
-	`Adresa` VARCHAR(50) NOT NULL,
-	UNIQUE(CNP),
-	FOREIGN KEY (IDUtilizator) REFERENCES Utilizator(IDUtilizator),
-	FOREIGN KEY (IDCard) REFERENCES Card(IDCard),
-	CHECK (Sex='M' or Sex='F')
 );
 
 #--Tabela Card cumparator
@@ -40,7 +26,25 @@ CREATE TABLE `Card` (
 	`Tip` VARCHAR(20) NOT NULL,
 	`Exp` DATE NOT NULL,
 	`Data` VARCHAR(50) NOT NULL,
-	`CCV` VARCHAR(50)
+	`CCV` VARCHAR(50),
+	PRIMARY KEY(`IDCard`)
+);
+
+
+
+CREATE TABLE `Persoana` (
+	`IDUtilizator` INT unsigned NOT NULL,
+	`IDCard` INT unsigned,
+	`Nume` VARCHAR(50) NOT NULL,
+	`Prenume` VARCHAR(50) NOT NULL,
+	`CNP` CHAR(13) NOT NULL,
+	`Sex` CHAR(1) DEFAULT 'M',
+	`Adresa` VARCHAR(50) NOT NULL,
+	PRIMARY KEY(`IDUtilizator`),
+	UNIQUE(CNP),
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`),
+	FOREIGN KEY (`IDCard`) REFERENCES Card(`IDCard`),
+	CHECK (Sex='M' or Sex='F')
 );
 
 #-- Tabela Vanzator (1:1 Utilizator)
@@ -50,9 +54,10 @@ CREATE TABLE `Vanzator` (
 	`Adresa` VARCHAR(50) NOT NULL,
 	`IBAN` VARCHAR(50),
 	`CUI` VARCHAR(50),
-	`NrTelefon` VARCHAR(12) NOT NULL, #--Contact pentru firma vanzatoare
+	`NrTelefon` VARCHAR(12) NOT NULL, 
 
-	FOREIGN KEY (IDUtilizator) REFERENCES Utilizator(IDUtilizator)
+	PRIMARY KEY(`IDUtilizator`),
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`)
 );
 
 #-- Tabela Telefoane puse la licitatie ( Utilizator/Vanzator 1:N Telefon )
@@ -66,21 +71,21 @@ CREATE TABLE `Telefon` (
 	`DataLicitiatie` DATETIME DEFAULT NOW(),
 	`Vandut` BOOL DEFAULT False,
 	
-	PRIMARY KEY (IDTelefon),
-	FOREIGN KEY (IDUtilizator) REFERENCES Utilizator(IDUtilizator)
+	PRIMARY KEY (`IDTelefon`),
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`)
 );
 
 #-- Tabela Licitatii ( Utilizator N:N Telefon)
 CREATE TABLE `Licitatie` (
-	`IDLicitatie` INT unsigned NOT NULL AUTO_INCREMENT,
-	`IDUtilizator` INT unsigned NOT NULL, #-- Cumparator
+	`IDUtilizator` INT unsigned NOT NULL, 
 	`IDTelefon` INT unsigned NOT NULL,
 	`PretLicitat` DECIMAL(10,2) NOT NULL,
 	`DataLicitatie` DATETIME DEFAULT NOW(), 
 	`Finalizata` BOOL DEFAULT False,
 	
-	PRIMARY KEY (IDLicitatie), #-- Un utilizator poate avea mai multe licitatii
-	FOREIGN KEY (IDUtilizator) REFERENCES Utilizator(IDUtilizator),
-	FOREIGN KEY (IDTelefon) REFERENCES Telefon(IDTelefon)
+	PRIMARY KEY (`IDUtilizator`, `IDTelefon`),
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`),
+	FOREIGN KEY (`IDTelefon`) REFERENCES Telefon(`IDTelefon`)
 );
+#-- IDUtilizator = Cumparator
 

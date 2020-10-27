@@ -9,6 +9,9 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 } 
 
+
+# --- DEBUG ---- #
+
 /*
 $sql = "SELECT id_ticket, id_user, id_location,paid FROM Tickets";
 $result = $conn->query($sql);
@@ -23,6 +26,21 @@ if ($result->num_rows > 0) {
 }
 */
 
+
+/*
+# LIST TABLES #
+$sql = " SELECT * FROM information_schema.tables WHERE table_schema=database() ;";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+  // output data of each row
+  while($row = $result->fetch_assoc()) {
+    echo "Table:" .$row["TABLE_NAME"]."\n";
+  }
+} else {
+  echo "0 results";
+}
+*/
 /*
 //Test database:
 $sql = "SELECT id_user, name,email, password FROM Person";

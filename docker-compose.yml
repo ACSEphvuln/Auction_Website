@@ -26,12 +26,13 @@ services:
       - MYSQL_ROOT_PASSWORD=rootpassword
     volumes:
       - ./dump:/docker-entrypoint-initdb.d
+    restart: always
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
     networks:
       - frontend
       - backend
-    container_name: pma
+    #container_name: pma
     links:
       - mysql
     environment:
