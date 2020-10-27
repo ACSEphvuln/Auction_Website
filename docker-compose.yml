@@ -26,6 +26,21 @@ services:
       - MYSQL_ROOT_PASSWORD=rootpassword
     volumes:
       - ./dump:/docker-entrypoint-initdb.d
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    networks:
+      - frontend
+      - backend
+    container_name: pma
+    links:
+      - mysql
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
 networks:
   frontend:
   backend:
