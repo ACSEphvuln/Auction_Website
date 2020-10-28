@@ -27,10 +27,11 @@ document.getElementById("menuBar").innerHTML=`
                 </div> 
                 <div class="navbar-collapse collapse">
                     <ul id="menu_list" class="nav navbar-nav">
-                        <li><a href="index.html">Home</a></li>
+                        <li><a href="index.php">Home</a></li>
                         <li><a href="shop.html">Shop page</a></li>
                         <li><a href="cart.html">Purchases</a></li>
                         <li><a href="checkout.html">Checkout</a></li>
+                        <li><a href="register.php">Register</a></li>
                         <li><a href="login.php">Login</a></li>
                         <li><a href="logout.php">Logout</a></li>
                     </ul>

@@ -38,13 +38,11 @@ CREATE TABLE `Persoana` (
 	`Nume` VARCHAR(50) NOT NULL,
 	`Prenume` VARCHAR(50) NOT NULL,
 	`CNP` CHAR(13) NOT NULL,
-	`Sex` CHAR(1) DEFAULT 'M',
-	`Adresa` VARCHAR(50) NOT NULL,
+	`Adresa` VARCHAR(80) NOT NULL,
 	PRIMARY KEY(`IDUtilizator`),
 	UNIQUE(CNP),
 	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`),
-	FOREIGN KEY (`IDCard`) REFERENCES Card(`IDCard`),
-	CHECK (Sex='M' or Sex='F')
+	FOREIGN KEY (`IDCard`) REFERENCES Card(`IDCard`)
 );
 
 #-- Tabela Vanzator (1:1 Utilizator)
@@ -64,6 +62,7 @@ CREATE TABLE `Vanzator` (
 CREATE TABLE `Telefon` (
 	`IDTelefon` INT unsigned NOT NULL AUTO_INCREMENT,
 	`IDUtilizator` INT unsigned NOT NULL, #-- Vanzator
+	`LocImagine` VARCHAR(50) NOT NULL,
 	`Nume` VARCHAR(50) NOT NULL,
 	`PretInitial` DECIMAL(10,2) NOT NULL, 
 	`AnAparitie` CHAR(4) NOT NULL,
@@ -88,4 +87,17 @@ CREATE TABLE `Licitatie` (
 	FOREIGN KEY (`IDTelefon`) REFERENCES Telefon(`IDTelefon`)
 );
 #-- IDUtilizator = Cumparator
+
+
+
+
+#------------------------------------------------
+
+INSERT INTO `Utilizator` (`Email`, `Parola`) VALUES
+('aP@a.c', 'ed2260eb29a229809ab6a4dabc66a3059bc3a5a8147ffa18cbc0f2867bc06843'),
+#-- Admin
+('aV@a.c', 'ed2260eb29a229809ab6a4dabc66a3059bc3a5a8147ffa18cbc0f2867bc06843'),
+#-- Admin
+('licitatorInstarit@example.com', '778af318efb63cb1f7dee5848310ad819b92627e070e1959b2db421c009a5197');
+#-- BDasf2131dmin
 
