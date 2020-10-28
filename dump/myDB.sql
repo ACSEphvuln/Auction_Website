@@ -23,9 +23,9 @@ CREATE TABLE `Utilizator` (
 #--Tabela Card cumparator
 CREATE TABLE `Card` (
 	`IDCard` INT unsigned NOT NULL AUTO_INCREMENT,
-	`Tip` VARCHAR(20) NOT NULL,
+	`Propietar` VARCHAR(50) NOT NULL,
 	`Exp` DATE NOT NULL,
-	`Data` VARCHAR(50) NOT NULL,
+	`Detalii` VARCHAR(50) NOT NULL,
 	`CCV` VARCHAR(50),
 	PRIMARY KEY(`IDCard`)
 );
