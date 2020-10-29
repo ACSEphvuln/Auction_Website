@@ -67,7 +67,7 @@ CREATE TABLE `Telefon` (
 	`PretInitial` DECIMAL(10,2) NOT NULL, 
 	`AnAparitie` CHAR(4) NOT NULL,
 	`Specificatii` VARCHAR(500),
-	`DataLicitiatie` DATETIME DEFAULT NOW(),
+	`DataLicitiatie` DATETIME NOT NULL,
 	`Vandut` BOOL DEFAULT False,
 	
 	PRIMARY KEY (`IDTelefon`),
@@ -79,8 +79,7 @@ CREATE TABLE `Licitatie` (
 	`IDUtilizator` INT unsigned NOT NULL, 
 	`IDTelefon` INT unsigned NOT NULL,
 	`PretLicitat` DECIMAL(10,2) NOT NULL,
-	`DataLicitatie` DATETIME DEFAULT NOW(), 
-	`Finalizata` BOOL DEFAULT False,
+	`DataLicitatie` DATETIME DEFAULT NOW(),
 	
 	PRIMARY KEY (`IDUtilizator`, `IDTelefon`),
 	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`),
@@ -94,10 +93,38 @@ CREATE TABLE `Licitatie` (
 #------------------------------------------------
 
 INSERT INTO `Utilizator` (`Email`, `Parola`) VALUES
-('aP@a.c', 'ed2260eb29a229809ab6a4dabc66a3059bc3a5a8147ffa18cbc0f2867bc06843'),
+('aP@auction.bb', 'ed2260eb29a229809ab6a4dabc66a3059bc3a5a8147ffa18cbc0f2867bc06843'),
 #-- Admin
-('aV@a.c', 'ed2260eb29a229809ab6a4dabc66a3059bc3a5a8147ffa18cbc0f2867bc06843'),
+('aV@auction.bb', 'ed2260eb29a229809ab6a4dabc66a3059bc3a5a8147ffa18cbc0f2867bc06843'),
 #-- Admin
-('licitatorInstarit@example.com', '778af318efb63cb1f7dee5848310ad819b92627e070e1959b2db421c009a5197');
+('licitatorInstarit@example.com', '778af318efb63cb1f7dee5848310ad819b92627e070e1959b2db421c009a5197'),
 #-- BDasf2131dmin
+('market@nocia.com','a43bbd89d311bd62270cc61557618a2e3c59a9a3ae7c888988bd58387b600365'),
+#-- Nocia
+('market@provider.com','322320dda3c2fb943a3d0468195f070b98c67460f19d041dfc1f3216e187fe24');
+#-- Provider
 
+INSERT INTO `Vanzator` (`IDUtilizator`,`NumeFirma` ,`Adresa`,`IBAN` ,`CUI`,`NrTelefon`) VALUES 
+(2,'Test Firma','127.0.0.1','1234567890','123456','0000000000'),
+(4,'Nocia SRL.','Bucuresti, Sector7, Orhideea Towers','RO0RN4123052230001234','612345','0700000000'),
+(5,'Provider SRL.','Bucuresti, Sector7, Orhideea Towers','RO0RN4123293333001444','192506','0700000000');
+
+
+INSERT INTO `Card` (`Propietar`, `Exp`, `Detalii`, `CCV`) VALUES
+('Admin', '4000-1-01', 'Card De Test','1.1.1.1'),
+('Banu Iliescu', '2020-6-13', '1396134821495123','521352');
+
+INSERT INTO `Persoana` (`IDUtilizator`,`IDCard`, `Nume`, `Prenume`, `CNP`, `Adresa`) VALUES
+(1,1, 'Admin', 'A.', '0000000000000','127.0.0.1'),
+(3,2, 'Banu', 'Iliescu', '1238539192423','Bucuresti, Sector 3, Bl 99, Sc 1, Ap 44');
+
+INSERT INTO `Telefon` (`IDUtilizator`,`LocImagine`,`Nume`,`PretInitial`,`AnAparitie`,`Specificatii`,`DataLicitiatie`,`Vandut`) VALUES
+(4,'img\\tel-1.jpg','Nocia 2000',400,'2000','Telefon super rapid, 1 GB RAM, 2GB Memorie, touch-screen din viitor!','2020-11-1',False),
+(5,'img\\tel-2.jpg','Samseng G7',500,'2004','Telefon mega rapid, 2 GB RAM, 2GB Memorie, touch-screen din viitor!','2020-10-12',True),
+(5,'img\\tel-3.jpg','GL 22',550,'2012','Telefon ultra rapid, 4 GB RAM, 4GB Memorie, touch-screen din viitor!','2020-12-5',False),
+(5,'img\\tel-4.jpg','ISO 802',600,'2013','Telefon giga rapid, 8 GB RAM, 4GB Memorie.','2021-1-20',False),
+(5,'img\\tel-5.jpg','Sonic 6',2000,'2015','Telefon penta rapid, 16 GB RAM, 8GB Memorie.','2020-1-15',False);
+
+
+INSERT INTO `Licitatie` (`IDUtilizator`,`IDTelefon`, `PretLicitat`, `DataLicitatie`) VALUES
+(3,2,600,'2020-10-10');
