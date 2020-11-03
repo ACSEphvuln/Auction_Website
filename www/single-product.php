@@ -1,3 +1,12 @@
+<?php
+include_once 'db_connect.php';
+include_once 'common.php';
+include_once 'accesscontrol.php';
+
+
+
+?>
+
 <!DOCTYPE html>
 <!--
 	ustora by freshdesignweb.com
@@ -48,7 +57,7 @@
             </div>
         </div>
     </div>
-    
+
     
     <div class="single-product-area">
         <div class="zigzag-bottom"></div>
@@ -60,35 +69,48 @@
                 <div class="col-md-8">
                     <div class="product-content-right">
 
+<?php 
+global $conn;
+$id_tel=trim($_GET["t"]);
+$id_tel=filter_var($id_tel, FILTER_VALIDATE_INT);
+if (!filter_var($id_tel, FILTER_VALIDATE_INT)) 
+    error("Internal Server Error.");
+$sql = "SELECT T.*, V.NumeFirma FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.IDTelefon = \"".$id_tel."\"";
+$result = $conn->query($sql);
+
+if ($result->num_rows > 0) {
+  // output data of each row
+  $row = $result->fetch_assoc(); ?>
+            Vandut de <?php echo $row["NumeFirma"]; ?>
                         <div class="row">
                             <div class="col-sm-6">
                                 <div class="product-images">
                                     <div class="product-main-img">
-                                        <img src="img/product-2.jpg" alt="">
+                                        <img src=<?php echo '"'.$row['LocImagine'].'"' ?> alt="">
                                     </div>
                                     
                                     <div class="product-gallery">
-                                        <img src="img/product-thumb-1.jpg" alt="">
-                                        <img src="img/product-thumb-2.jpg" alt="">
-                                        <img src="img/product-thumb-3.jpg" alt="">
+                                        <img src=<?php echo '"'.$row['LocImagine'].'"' ?>>
                                     </div>
                                 </div>
                             </div>
                             
                             <div class="col-sm-6">
                                 <div class="product-inner">
-                                    <h2 class="product-name">Sony Smart TV - 2015</h2>
+                                    <h2 class="product-name"><?php echo $row["Nume"].' - '.$row["AnAparitie"]; ?></h2>
                                     <div class="product-inner-price">
-                                        <ins>$700.00</ins> <del>$100.00</del>
+                                        <ins><?php echo $row["PretInitial"]; ?></ins>
                                     </div>    
                                     
                                     <form action="" class="cart">
                                         <button class="add_to_cart_button" type="submit">Add to cart</button>
                                     </form>   
                                     
+                                    <?php if($row['Vandut']==True){ ?>
                                     <div class="product-inner-category">
-                                        <p>SOME TEXT</p>
+                                        <p>VANDUT</p>
                                     </div> 
+                                <?php } ?>
                                     
                                     <div role="tabpanel">
                                         <ul class="product-tab" role="tablist">
@@ -100,9 +122,7 @@
                                         <div class="tab-content">
                                             <div role="tabpanel" class="tab-pane fade in active" id="home">
                                                 <h2>Product Description</h2>  
-                                                <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nam tristique, diam in consequat iaculis, est purus iaculis mauris, imperdiet facilisis ante ligula at nulla. Quisque volutpat nulla risus, id maximus ex aliquet ut. Suspendisse potenti. Nulla varius lectus id turpis dignissim porta. Quisque magna arcu, blandit quis felis vehicula, feugiat gravida diam. Nullam nec turpis ligula. Aliquam quis blandit elit, ac sodales nisl. Aliquam eget dolor eget elit malesuada aliquet. In varius lorem lorem, semper bibendum lectus lobortis ac.</p>
-
-                                                <p>Mauris placerat vitae lorem gravida viverra. Mauris in fringilla ex. Nulla facilisi. Etiam scelerisque tincidunt quam facilisis lobortis. In malesuada pulvinar neque a consectetur. Nunc aliquam gravida purus, non malesuada sem accumsan in. Morbi vel sodales libero.</p>
+                                                <?php echo $row["Specificatii"]; ?>
                                             </div>
 
 
@@ -135,7 +155,9 @@
                                 </div>
                             </div>
                         </div>
-                        
+<?php }
+else error("Invalid phone id.");
+?>
                         
  
                     </div>                    
