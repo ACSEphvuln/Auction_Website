@@ -30,7 +30,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }
 
 
-    echo $date;
     $query="INSERT INTO Card (Propietar, Exp, Detalii,CCV) VALUES(?,?,?,?)"; 
     if ($stmt = $conn->prepare($query)) {
         $stmt->bind_param("ssss",$owner,$date,$details,$ccv);

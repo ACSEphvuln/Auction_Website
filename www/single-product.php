@@ -3,6 +3,58 @@ include_once 'db_connect.php';
 include_once 'common.php';
 include_once 'accesscontrol.php';
 
+global $conn;
+
+if($_SERVER["REQUEST_METHOD"] == "POST"){
+
+    if(!isset($_SESSION['idU']))
+        error("Login first!");
+
+    if(!isset($_POST['idtelefon']))
+        error("Internal Server Error at POST.");
+    
+    $query= 'SELECT IDCard FROM Persoana WHERE IDUtilizator = ?';
+
+    if ($stmt = $conn->prepare($query)) {
+    $stmt->bind_param("s", $_SESSION['idU']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if($result->num_rows ===0 ) 
+        error("Internal Server Error");
+    $row = $result->fetch_assoc();
+
+    if ($row['IDCard'] != NULL) {
+
+        $idt=trim($_POST['idtelefon']);
+        $idt=filter_var($idt, FILTER_VALIDATE_INT);
+        $val=trim($_POST['valoare']);
+        $val=filter_var($val, FILTER_VALIDATE_INT);
+
+        $sql = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ".$idt;
+        $result = $conn->query($sql);
+        if ($result->num_rows > 0){
+            $row = $result->fetch_assoc();
+
+            if($row["PretInitial"] < $val){
+                $f = fopen("./auction/".$idt.".csv", "a") or die("Unable to open file!");
+                fwrite($f, date("Y-m-d h:i:sa").",".$_SESSION['idU'].",".$val."\n");
+                fclose($f);
+            } else{
+                error("Pret mai mic decat cel minim!");
+            }
+
+        } else error("Internal Server Error.");
+
+
+    }else{
+        error("Introduce card details before in section Account Information.");
+    }
+    $stmt->close();
+  }
+
+
+
+}
 
 
 ?>
@@ -68,7 +120,6 @@ include_once 'accesscontrol.php';
                     <div class="product-content-right">
 
 <?php 
-global $conn;
 $id_tel=trim($_GET["t"]);
 $id_tel=filter_var($id_tel, FILTER_VALIDATE_INT);
 if (!filter_var($id_tel, FILTER_VALIDATE_INT)) 
@@ -100,22 +151,24 @@ if ($result->num_rows > 0) {
                                         <ins>Pret Initial: <?php echo $row["PretInitial"]; ?> lei</ins>
                                     </div>    
                                     
-                                    <form action="" class="cart">
-                                        <button class="add_to_cart_button" type="submit">Add to cart</button>
-                                    </form>   
                                     
                                     <?php if($row['Vandut']==True){ ?>
                                     <div class="product-inner-category">
                                         <p>VANDUT</p>
                                     </div> 
-                                <?php } ?>
-                                    
+                                <?php } else{ ?>
+                                    <form action="" class="cart" method="post">
+                                        <label for="valoare">Licit (lei):</label> 
+                                        <input name="valoare" type="text">
+                                        <input name="idtelefon" type="text" value=<?php echo "\"".$_GET["t"]."\"";?> hidden="True" >
+                                        <button class="add_to_cart_button" type="submit">Licita</button>
+                                    </form>   
+                                    <?php }?>
                                     <div role="tabpanel">
                                         <ul class="product-tab" role="tablist">
                                             <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Description</a></li>
-                                            <!-- REVIEWS
-                                            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Reviews</a></li>
-                                            -->
+                                            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Licitatii</a></li>
+
                                         </ul>
                                         <div class="tab-content">
                                             <div role="tabpanel" class="tab-pane fade in active" id="home">
@@ -125,28 +178,25 @@ if ($result->num_rows > 0) {
 
 
 
-                                            <!--REVIEWS
                                             <div role="tabpanel" class="tab-pane fade" id="profile">
-                                                <h2>Reviews</h2>
-                                                <div class="submit-review">
-                                                    <p><label for="name">Name</label> <input name="name" type="text"></p>
-                                                    <p><label for="email">Email</label> <input name="email" type="email"></p>
-                                                    <div class="rating-chooser">
-                                                        <p>Your rating</p>
-
-                                                        <div class="rating-wrap-post">
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                            <i class="fa fa-star"></i>
-                                                        </div>
-                                                    </div>
-                                                    <p><label for="review">Your review</label> <textarea name="review" id="" cols="30" rows="10"></textarea></p>
-                                                    <p><input type="submit" value="Submit"></p>
-                                                </div>
+                                                <h2>Licitatii</h2>
+                                                <?php
+                                                if(isset($_GET['t']))
+                                                    $idt=$_GET['t'];
+                                                else 
+                                                    $idt=$_POST['idtelefon'];
+                                                $idt ="./auction/".$idt.".csv";
+                                                if(file_exists($idt)){
+                                                    $f=fopen($idt, "r");
+                                                    if($f !== FALSE){
+                                                    while (($data = fgetcsv($f, 1000, ",")) !== FALSE)
+                                                        echo $data[0]." - ".$data[2]." lei<br>";
+                                                    
+                                                    fclose($f);
+                                                    }
+                                                }
+                                                ?>
                                             </div>
-                                            -->
                                         </div>
                                     </div>
                                     

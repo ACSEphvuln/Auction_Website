@@ -6,6 +6,8 @@ services:
       - backend
     volumes:
       - ./www/:/var/www/html/
+    tmpfs:
+      - /var/www/html/auction/
   apache:
     build: './apache/'
     depends_on:
