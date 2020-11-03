@@ -61,7 +61,7 @@ include_once 'db_connect.php';
 <?php 
 global $conn;
 
-$sql = "SELECT IDTelefon, LocImagine,Nume,PretInitial FROM Telefon";
+$sql = "SELECT IDTelefon, LocImagine,Nume,PretInitial,Vandut FROM Telefon";
 $result = $conn->query($sql);
 
 if ($result->num_rows > 0) {
@@ -74,12 +74,14 @@ if ($result->num_rows > 0) {
                             <img src=<?php echo '"'.$row['LocImagine'].'"' ?>>
                         </div>
                         <h2><a href=""><?php echo $row['Nume'] ?></a></h2>
+                            <?php if($row["Vandut"]==True) echo "VANDUT"; 
+                            else{?>
                         <div class="product-carousel-price">
-                            <ins><?php echo $row['PretInitial']?></ins>
+                            <ins>Pret initial: <?php echo $row['PretInitial']?> lei</ins>
                         </div>  
-                        
+                            <?php }?>
                         <div class="product-option-shop">
-                            <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href=<?php echo "\"single-product.php?t=".$row['IDTelefon']."\"" ?>>Add to cart</a>
+                            <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href=<?php echo "\"single-product.php?t=".$row['IDTelefon']."\"" ?>>Detalii</a>
                         </div>                       
                     </div>
                 </div>

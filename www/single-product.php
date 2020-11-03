@@ -63,8 +63,6 @@ include_once 'accesscontrol.php';
         <div class="zigzag-bottom"></div>
         <div class="container">
             <div class="row">
-                <div class="col-md-4">
-                    
                     
                 <div class="col-md-8">
                     <div class="product-content-right">
@@ -99,7 +97,7 @@ if ($result->num_rows > 0) {
                                 <div class="product-inner">
                                     <h2 class="product-name"><?php echo $row["Nume"].' - '.$row["AnAparitie"]; ?></h2>
                                     <div class="product-inner-price">
-                                        <ins><?php echo $row["PretInitial"]; ?></ins>
+                                        <ins>Pret Initial: <?php echo $row["PretInitial"]; ?> lei</ins>
                                     </div>    
                                     
                                     <form action="" class="cart">
@@ -155,13 +153,11 @@ if ($result->num_rows > 0) {
                                 </div>
                             </div>
                         </div>
+                    </div>                    
+                </div>
 <?php }
 else error("Invalid phone id.");
 ?>
-                        
- 
-                    </div>                    
-                </div>
             </div>
         </div>
     </div>
