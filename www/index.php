@@ -1,5 +1,7 @@
 <?php
 include_once 'common.php';
+include_once 'accesscontrol.php';
+
 echo $HEADER;
 echo printHeader("Welcome");
 echo <<<WELCOME
