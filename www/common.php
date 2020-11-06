@@ -1,166 +1,125 @@
 <?php // common.php
-include_once 'db_connect.php';
-
-function hack_attempt(){
-    session_unset(); 
-    session_destroy();
-    error("Internal server error.");
-    header("Location: index.php");
-}
-
-function print_login(){
-  if(!isset($_SESSION['user'])):
-  ?>
-
-    <li class="login"><a href="login.php">
-        <i class="ti-user"></i> Sign in or Register</a>
-<?php 
-else: 
-?>
-     <li class="add-list"><a href="myflights.php"><i class="ti-plus"></i> My flights</a></li>
-    <li style="color:red">Welcome, <?php echo $_SESSION['user']; ?> 
-    </li>
-    <li><a href="logout.php">Log out</a></li>
-<?php 
-  endif;
-}
-
 
 function error($msg) {
-?>
-<html>
-<head>
-  <script language="JavaScript">
-  <!--
-  alert("<?=$msg?>");
-  history.back();
-  //-->
-  </script>
-</head>
-<body>
-</body>
+  echo "<script language=\"JavaScript\">alert(\"${msg}\");history.back();</script>";
+  exit;
+}
+
+function filter($input,$inputMaxLen,$filterType,$method="POST"){
+  $inputName=$input;
+  if($method == "POST"){
+    $input=$_POST[$input];
+    if(isset($_POST[$input]))
+      error("Please provide the ".$inputName.".");
+  }else{
+    $input=$_GET[$input];
+    if(!isset($_GET[$input]))
+      error("Please provide the ".$inputName.".");
+  }
+
+  $input=trim($input);
+  if(empty($input))
+    error("Please provide the ".$inputName.".");
+
+  if(strlen($input)>$inputMaxLen)
+    error(ucfirst($inputName)." too long!");
+
+  $input=filter_var($input, $filterType);
+  if (!$input) 
+    error("Please provide a valid".$inputName.".");
+
+  return $input;
+}
+
+
+function PrintHeader($headername){
+return <<<PrintHeaderHTML
+<!DOCTYPE html>
+<!--
+  ustora by freshdesignweb.com
+  Twitter: https://twitter.com/freshdesignweb
+  URL: https://www.freshdesignweb.com/ustora/
+-->
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Checkout Page - E-Comerce</title>
+    
+    <!-- Google Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700,300' rel='stylesheet' type='text/css'>
+    <link href='http://fonts.googleapis.com/css?family=Raleway:400,100' rel='stylesheet' type='text/css'>
+    
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="css/font-awesome.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/owl.carousel.css">
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
+
+    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <object id="menuBar"></object>
+    
+    <div class="product-big-title-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="product-bit-title text-center">
+                        <h2>${headername}</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+PrintHeaderHTML;
+}
+
+$FOOTER=<<<FOOTERHTML
+
+    <div class="footer-bottom-area">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="copyright">
+                        <p>Project's Opens Source Template: &copy; 2015 E-Commerce. todos los derechso reservados. <a href="https://jairandresdiazp.blogspot.com.co/" target="_blank">https://jairandresdiazp.blogspot.com.co/</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> <!-- End footer bottom area -->
+   
+   
+    <!-- Latest jQuery form server -->
+    <script src="https://code.jquery.com/jquery.min.js"></script>
+    
+    <!-- Bootstrap JS form CDN -->
+    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
+    
+    <!-- jQuery sticky menu -->
+    <script src="js/owl.carousel.min.js"></script>
+    <script src="js/jquery.sticky.js"></script>
+    
+    <!-- jQuery easing -->
+    <script src="js/jquery.easing.1.3.min.js"></script>
+    
+    <!-- Main Script -->
+    <script src="js/main.js"></script>
+    <script type="text/javascript" src="js/menu.js"></script>
+
+  </body>
 </html>
-<?php
-exit;
-}
-
-
-
-
-function print_location(){
-
-global $conn;
-
-$sql = "SELECT * FROM Location";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-  // output data of each row
-  while($row = $result->fetch_assoc()) {
-
+FOOTERHTML;
 ?>
-<div class="col-lg-6 ">
-    <div class="single-listing mb-30">
-        <div class="list-img">
-            <img src=<?php echo "\"".$row["image"]."\""?> alt="">
-        </div>
-        <div class="list-caption">
-            <span><a href=<?php echo "\"display.php?loc=" .$row["name"] . "\""?> >Open</a></span>
-            <h3><?php echo $row["name"]?></h3>
-            <p><?php echo $row["description"]?></p>
-
-        </div>
-    </div>
-</div>
-
-
-<?php
-
-
-  }
-} else {
-  error("Internal error: Location database empty.");
-}
-
-}
-
-
-
-function print_tickets(){
-
-global $conn;
-
-$sql = "SELECT L.name, L.description, L.image, T.paid FROM Tickets T INNER JOIN Location L ON  T.id_location = L.id_location Where T.id_user = \"" .$_SESSION['id_user']. "\"";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-  // output data of each row
-  while($row = $result->fetch_assoc()) {
-
-?>
-<div class="col-lg-6 ">
-    <div class="single-listing mb-30">
-        <div class="list-img">
-            <img src=<?php echo "\"".$row["image"]."\""?> alt="">
-        </div>
-        <div class="list-caption">
-            <h3><?php echo $row["name"]?></h3>
-            <p><?php echo $row["description"]?></p>
-            <p>Costed: <?php echo $row["paid"]?> </p>
-        </div>
-    </div>
-</div>
-
-
-<?php
-
-
-  }
-}
-
-}
-
-function comments($loc=""){
-
-  global $conn;
-
-  $sql = "SELECT M.* FROM Message M INNER JOIN Location L ON  M.name_location = L.name Where L.name = '$loc';";
-  $result = $conn->query($sql);
-
-  if ($result->num_rows > 0) {
-    // output data of each row
-    while($row = $result->fetch_assoc()) {
-
-  ?>
-                        <div class="comment-list" align-items-center >
-                          <div class="single-comment justify-content-between d-flex">
-                            <div class="user justify-content-between d-flex">
-                                <div class="thumb">
-                                    <img src="assets/img/comment/comment_1.png" alt="">
-                                </div>
-                                <div class="desc">
-                                    <p class="comment">
-                                    <?php echo $row["description"]?>
-                                    </p>
-                                    <div class="d-flex justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                        <h5>
-                                            <a href="#"><?php echo $row["subject"]?></a>
-                                        </h5>
-                                        
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-  <?php
-
-
-    }
-  } else {
-    error("Internal error: Location database empty.");
-  }
-
-}
