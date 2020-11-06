@@ -97,6 +97,7 @@ PRICE;
 
 
 
+echo $HEADER;
 echo printHeader("Product");
 
 echo <<<PART

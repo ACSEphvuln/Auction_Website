@@ -131,6 +131,7 @@ if($cardDetails == '')
                             </form>
 ENTERCARD;
 
+echo $HEADER;
 echo PrintHeader("Account info");
 echo
 <<<PART

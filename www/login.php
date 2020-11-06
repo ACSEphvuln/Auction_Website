@@ -39,6 +39,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     header("Location: index.php");
 }
 
+echo $HEADER;
 echo PrintHeader("Login");
 echo <<<LOGINPAGE
 

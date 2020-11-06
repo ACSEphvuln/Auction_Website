@@ -1,5 +1,6 @@
 <?php
 include_once 'common.php';
+echo $HEADER;
 echo printHeader("Welcome");
 echo <<<WELCOME
     <br>

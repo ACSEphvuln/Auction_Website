@@ -31,9 +31,7 @@ function filter($input,$inputMaxLen,$filterType,$method="POST"){
   return $input;
 }
 
-
-function PrintHeader($headername){
-return <<<PrintHeaderHTML
+$HEADER=<<<HEADERHTML 
 <!DOCTYPE html>
 <!--
   ustora by freshdesignweb.com
@@ -45,7 +43,7 @@ return <<<PrintHeaderHTML
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Checkout Page - E-Comerce</title>
+    <title>Auction.bb</title>
     
     <!-- Google Fonts -->
     <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
@@ -72,7 +70,11 @@ return <<<PrintHeaderHTML
   </head>
   <body>
     <object id="menuBar"></object>
-    
+HEADERHTML;
+
+
+function PrintHeader($headername){
+return <<<PrintHeaderHTML
     <div class="product-big-title-area">
         <div class="container">
             <div class="row">

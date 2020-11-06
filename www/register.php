@@ -67,6 +67,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 }
 
+echo $HEADER;
 echo PrintHeader("Register");
 echo <<<REGISTERPAGE
     

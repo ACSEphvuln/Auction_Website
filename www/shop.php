@@ -43,11 +43,8 @@ PHONE;
 
 
 
-
+echo $HEADER;
 echo PrintHeader("Shop");
-
-
-
 echo <<<SHOPPAGE
     <div class="single-product-area">
         <div class="zigzag-bottom"></div>
