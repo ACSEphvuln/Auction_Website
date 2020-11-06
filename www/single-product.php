@@ -37,7 +37,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
             if($row["PretInitial"] < $val){
                 $f = fopen("./auction/".$idt.".csv", "a") or die("Unable to open file!");
-                fwrite($f, date("Y-m-d h:i:sa").",".$_SESSION['idU'].",".$val."\n");
+                fwrite($f, date("Y-m-d h:i:s").",".$_SESSION['idU'].",".$val."\n");
                 fclose($f);
             } else{
                 error("Pret mai mic decat cel minim!");
@@ -96,10 +96,26 @@ SOLD;
 PRICE;
 
 
+$auctions='';
+
+if(isset($_GET['t']))
+        $idt=$_GET['t'];
+    else 
+        $idt=$_POST['idtelefon'];
+    $idt ="./auction/".$idt.".csv";
+    if(file_exists($idt)){
+        $f=fopen($idt, "r");
+        if($f !== FALSE){
+        while (($data = fgetcsv($f, 1000, ",")) !== FALSE)
+            $auctions=$auctions.$data[0]." - ".$data[2]." lei<br>";
+        
+        fclose($f);
+        }
+    }
+
 
 echo $HEADER;
 echo printHeader("Product");
-
 echo <<<PART
     <div class="single-product-area">
         <div class="zigzag-bottom"></div>
@@ -144,23 +160,7 @@ echo <<<PART
 
                                             <div role="tabpanel" class="tab-pane fade" id="profile">
                                                 <h2>Licitatii</h2>
-PART;
-
-    if(isset($_GET['t']))
-        $idt=$_GET['t'];
-    else 
-        $idt=$_POST['idtelefon'];
-    $idt ="./auction/".$idt.".csv";
-    if(file_exists($idt)){
-        $f=fopen($idt, "r");
-        if($f !== FALSE){
-        while (($data = fgetcsv($f, 1000, ",")) !== FALSE)
-            echo $data[0]." - ".$data[2]." lei<br>";
-        
-        fclose($f);
-        }
-    }
-echo <<<FINISH
+                                            ${auctions}
                                             </div>
                                         </div>
                                     </div>
@@ -172,7 +172,7 @@ echo <<<FINISH
             </div>
         </div>
     </div>
-FINISH;
+PART;
 }
 else error("Invalid phone id.");
 echo $FOOTER;

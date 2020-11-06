@@ -31,7 +31,7 @@ function filter($input,$inputMaxLen,$filterType,$method="POST"){
   return $input;
 }
 
-$HEADER=<<<HEADERHTML 
+$HEADER=<<<'HEADERHTML'
 <!DOCTYPE html>
 <!--
   ustora by freshdesignweb.com
@@ -89,7 +89,7 @@ return <<<PrintHeaderHTML
 PrintHeaderHTML;
 }
 
-$FOOTER=<<<FOOTERHTML
+$FOOTER=<<<'FOOTERHTML'
 
     <div class="footer-bottom-area">
         <div class="container">

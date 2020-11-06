@@ -5,7 +5,7 @@ document.getElementById("menuBar").innerHTML=`
             <div class="row">
                 <div class="col-sm-6">
                     <div class="logo">
-                        <h1><a href="index.html"><img src="img/logo.png"></a></h1>
+                        <h1><a href="index.php"><img src="img/logo.png"></a></h1>
                     </div>
                 </div>
                 
