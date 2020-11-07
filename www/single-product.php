@@ -14,7 +14,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         error("Internal Server Error at POST.");
     
     $query= 'SELECT IDCard FROM Persoana WHERE IDUtilizator = ?';
-
     if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("s", $_SESSION['idU']);
     $stmt->execute();
@@ -24,21 +23,26 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $row = $result->fetch_assoc();
 
     if ($row['IDCard'] != NULL) {
+        $idt=filter("idtelefon",10,FILTER_VALIDATE_INT);
+        $val=filter("valoare",14,FILTER_VALIDATE_INT);
 
-        $idt=trim($_POST['idtelefon']);
-        $idt=filter_var($idt, FILTER_VALIDATE_INT);
-        $val=trim($_POST['valoare']);
-        $val=filter_var($val, FILTER_VALIDATE_INT);
+        $query = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ?";
+        if ($stmt = $conn->prepare($query)) {
+        $stmt->bind_param("i",$idt);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $stmt->close();
+        } else error("Internal server error.");
 
-        $sql = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ".$idt;
-        $result = $conn->query($sql);
         if ($result->num_rows > 0){
             $row = $result->fetch_assoc();
 
             if($row["PretInitial"] < $val){
+
                 $f = fopen("./auction/".$idt.".csv", "a") or die("Unable to open file!");
                 fwrite($f, date("Y-m-d h:i:s").",".$_SESSION['idU'].",".$val."\n");
                 fclose($f);
+
             } else{
                 error("Pret mai mic decat cel minim!");
             }
@@ -49,7 +53,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     }else{
         error("Introduce card details before in section Account Information.");
     }
-    $stmt->close();
   }
 
 
@@ -62,8 +65,13 @@ $id_tel=trim($_GET["t"]);
 $id_tel=filter_var($id_tel, FILTER_VALIDATE_INT);
 if (!filter_var($id_tel, FILTER_VALIDATE_INT)) 
     error("Internal Server Error.");
-$sql = "SELECT T.*, V.NumeFirma FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.IDTelefon = \"".$id_tel."\"";
-$result = $conn->query($sql);
+$query = "SELECT T.*, V.NumeFirma FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.IDTelefon = ?";
+if ($stmt = $conn->prepare($query)) {
+$stmt->bind_param("i",$id_tel);
+$stmt->execute();
+$result = $stmt->get_result();
+$stmt->close();
+} else error("Internal server error.");
 
 if ($result->num_rows > 0) {
   // output data of each row
@@ -78,21 +86,21 @@ if ($result->num_rows > 0) {
   $spec=$row["Specificatii"];
     if($sold)
         $price=<<<SOLD
-                                        <div class="product-inner-category">
-                                            <p>VANDUT</p>
-                                        </div> 
+<div class="product-inner-category">
+    <p>VANDUT</p>
+</div> 
 SOLD;
     else
         $price=<<<PRICE
-                                    <div class="product-inner-price">
-                                        <ins>Pret Initial: ${initialPrice} lei</ins>
-                                    </div>
-                                    <form action="" class="cart" method="post">
-                                        <label for="valoare">Licit (lei):</label> 
-                                        <input name="valoare" type="text">
-                                        <input name="idtelefon" type="text" value=${phoneid} hidden="True" >
-                                        <button class="add_to_cart_button" type="submit">Licita</button>
-                                    </form>
+<div class="product-inner-price">
+    <ins>Pret Initial: ${initialPrice} lei</ins>
+</div>
+<form action="" class="cart" method="post">
+    <label for="valoare">Licit (lei):</label> 
+    <input name="valoare" type="text">
+    <input name="idtelefon" type="text" value=${phoneid} hidden="True" >
+    <button class="add_to_cart_button" type="submit">Licita</button>
+</form>
 PRICE;
 
 

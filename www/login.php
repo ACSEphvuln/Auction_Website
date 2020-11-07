@@ -11,31 +11,23 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $email=filter("email",50,FILTER_VALIDATE_EMAIL);
     $password=filter("password",50,FILTER_SANITIZE_STRING);
 
-    $query= 'SELECT Email,Parola FROM Utilizator WHERE email = ? AND parola = ?';
+    $query= 'SELECT IDUtilizator,Email,Parola FROM Utilizator WHERE email = ? AND parola = ?';
     if ($stmt = $conn->prepare($query)) {
-      $pass_hash=hash('sha256', 'BD'.$password);
+        $pass_hash=hash('sha256', 'BD'.$password);
         $stmt->bind_param("ss", $email,$pass_hash);
         $stmt->execute();
-        $stmt->store_result();
-        if ($stmt->num_rows == 0) {
+        $result = $stmt->get_result();
+        if($result->num_rows === 0 )
            error('Wrong email/passowrd combination.');
-      }
+        $row = $result->fetch_assoc();
+        $email=$row['Email'];
+        session_regenerate_id(TRUE);
+        $_SESSION["idU"]=$row["IDUtilizator"];
+
       $stmt->close();
     } else error('Unexpecter error.');
 
     // login sucessful
-    session_regenerate_id(TRUE);
-    $_SESSION['email']=$email;
-
-    $sql = "SELECT IDUtilizator FROM Utilizator WHERE email = \"".$email."\"";
-    $result = $conn->query($sql);
-
-    if ($result->num_rows > 0){
-    $row = $result->fetch_assoc();
-    $_SESSION["idU"]=$row["IDUtilizator"];
-    } else error("Internal server error.");
-
-
     header("Location: index.php");
 }
 

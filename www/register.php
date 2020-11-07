@@ -28,13 +28,12 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $stmt->execute();
     $stmt->store_result();
     if ($stmt->num_rows > 0) {
-        error('There is already a registered account with your email.\n Please check agian your email or reset your password.');
+        error('There is already a registered account with your email.');
     }
     $stmt->close();
   }
 
   $query="INSERT INTO Utilizator (Email, Parola) VALUES(?,?)"; 
-
   if ($stmt = $conn->prepare($query)) {
     $pass_hash=hash('sha256', 'BD'.$password);
     $stmt->bind_param("ss",$email,$pass_hash);
@@ -42,21 +41,10 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $stmt->close();
   } else error("Internal server error.");
 
-
-  $sql = "SELECT IDUtilizator FROM Utilizator WHERE email = \"".$email."\"";
-  $result = $conn->query($sql);
-
-  if ($result->num_rows > 0){
-  $row = $result->fetch_assoc();
-  $id_user=$row["IDUtilizator"];
-  } else error("Internal server error.");
-
-
-  $query="INSERT INTO Persoana (IDUtilizator, Nume, Prenume, CNP, Adresa) VALUES(?,?,?,?,?)"; 
-
+  $query="INSERT INTO Persoana (IDUtilizator, Nume, Prenume, CNP, Adresa) SELECT Utilizator.IDUtilizator,?,?,?,? FROM Utilizator WHERE Utilizator.Email = ? "; 
   if ($stmt = $conn->prepare($query)) {
     $pass_hash=hash('sha256', 'BD'.$password);
-    $stmt->bind_param("sssss",$id_user,$lastname,$firstname,$CNP,$address);
+    $stmt->bind_param("sssss",$lastname,$firstname,$CNP,$address,$email);
     $stmt->execute();
     $stmt->close();
   } else error("Internal server error.");

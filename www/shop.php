@@ -25,18 +25,18 @@ if ($result->num_rows > 0) {
         $price = "VANDUT";
 
 $phones=$phones. <<<PHONE
-                <div class="col-md-3 col-sm-6">
-                    <div class="single-shop-product">
-                        <div class="product-upper">
-                            <img src=${imgLocation}>
-                        </div>
-                        <h2><a href="">${name}</a></h2>
-                            ${price}
-                        <div class="product-option-shop">
-                            <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href="single-product.php?t=${phoneID}" >Detalii</a>
-                        </div>                       
-                    </div>
-                </div>
+<div class="col-md-3 col-sm-6">
+    <div class="single-shop-product">
+        <div class="product-upper">
+            <img src=${imgLocation}>
+        </div>
+        <h2><a href="">${name}</a></h2>
+            ${price}
+        <div class="product-option-shop">
+            <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href="single-product.php?t=${phoneID}" >Detalii</a>
+        </div>                       
+    </div>
+</div>
 PHONE;
  }
 }
