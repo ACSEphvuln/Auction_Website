@@ -67,7 +67,7 @@ CREATE TABLE `Telefon` (
 	`PretInitial` DECIMAL(10,2) NOT NULL, 
 	`AnAparitie` CHAR(4) NOT NULL,
 	`Specificatii` VARCHAR(500),
-	`DataLicitiatie` DATETIME NOT NULL,
+	`DataLicitatie` DATETIME NOT NULL,
 	`Vandut` BOOL DEFAULT False,
 	
 	PRIMARY KEY (`IDTelefon`),
@@ -118,7 +118,7 @@ INSERT INTO `Persoana` (`IDUtilizator`,`IDCard`, `Nume`, `Prenume`, `CNP`, `Adre
 (1,1, 'Admin', 'A.', '0000000000000','127.0.0.1'),
 (3,2, 'Banu', 'Iliescu', '1238539192423','Bucuresti, Sector 3, Bl 99, Sc 1, Ap 44');
 
-INSERT INTO `Telefon` (`IDUtilizator`,`LocImagine`,`Nume`,`PretInitial`,`AnAparitie`,`Specificatii`,`DataLicitiatie`,`Vandut`) VALUES
+INSERT INTO `Telefon` (`IDUtilizator`,`LocImagine`,`Nume`,`PretInitial`,`AnAparitie`,`Specificatii`,`DataLicitatie`,`Vandut`) VALUES
 (4,'img\\tel-1.jpg','Nocia 2000',400,'2000','Telefon super rapid, 1 GB RAM, 2GB Memorie, touch-screen din viitor!','2020-11-1',False),
 (5,'img\\tel-2.jpg','Samseng G7',500,'2004','Telefon mega rapid, 2 GB RAM, 2GB Memorie, touch-screen din viitor!','2020-10-12',True),
 (5,'img\\tel-3.jpg','GL 22',550,'2012','Telefon ultra rapid, 4 GB RAM, 4GB Memorie, touch-screen din viitor!','2020-12-5',False),
