@@ -2,12 +2,12 @@ var pageName = window.location.pathname.split("/").pop();
 
 let items = [
         ['Home','index.php'],
-        ['Shop','shop.php'],
-        ['Purchases','purchases.php']
+        ['Shop','shop.php']
     ];
 
 
 if(document.cookie.indexOf("auth=")>0){
+    items.push(['Purchases','purchases.php']);
     items.push(['Account Info','account_info.php']);
     items.push(['Logout','logout.php']);
 } else{

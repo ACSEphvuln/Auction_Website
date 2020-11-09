@@ -1,87 +1,60 @@
-<!DOCTYPE html>
-<!--
-	ustora by freshdesignweb.com
-	Twitter: https://twitter.com/freshdesignweb
-	URL: https://www.freshdesignweb.com/ustora/
--->
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cart Page - E-Comerce</title>
-    
-    <!-- Google Fonts -->
-    <link href='http://fonts.googleapis.com/css?family=Titillium+Web:400,200,300,700,600' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Roboto+Condensed:400,700,300' rel='stylesheet' type='text/css'>
-    <link href='http://fonts.googleapis.com/css?family=Raleway:400,100' rel='stylesheet' type='text/css'>
-    
-    <!-- Bootstrap -->
-    <link rel="stylesheet" href="css/bootstrap.min.css">
-    
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="css/font-awesome.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/owl.carousel.css">
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
+<?
+include_once 'db_connect.php';
+include_once 'common.php';
+include_once 'accesscontrol.php';
 
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-  </head>
-  <body>
-    <div class="site-branding-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-sm-6">
-                    <div class="logo">
-                        <h1><a href="index.php"><img src="img/logo.png"></a></h1>
-                    </div>
-                </div>
-                
-                
-            </div>
-        </div>
-    </div> <!-- End site branding area -->
-    
-    <div class="mainmenu-area">
-        <div class="container">
-            <div class="row">
-                <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                        <span class="sr-only">Toggle navigation</span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                        <span class="icon-bar"></span>
-                    </button>
-                </div> 
-                <div class="navbar-collapse collapse">
-                    <ul id="menu_list" class="nav navbar-nav">
+if(!isset($_SESSION['idU']))
+  header("Location: login.php");
 
-                    </ul>
-                </div>  
-            </div>
-        </div>
-    </div> <!-- End mainmenu area -->
-    
-    <div class="product-big-title-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="product-bit-title text-center">
-                        <h2>Shopping Cart</h2>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> <!-- End Page title area -->
-    
-    
+echo $HEADER;
+echo PrintHeader('Puchases');
+  
+$hasPurchased=True;
+
+$query = "SELECT T.IDTelefon, T.LocImagine, T.Nume, L.PretLicitat, L.DataLicitatie FROM Licitatie L INNER JOIN Telefon T ON L.IDTelefon = T.IDTelefon Where L.IDUtilizator = ?";
+if ($stmt = $conn->prepare($query)) {
+    $stmt->bind_param("i",$_SESSION['idU']);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    if ($result->num_rows > 0){
+        $purchases="<tr class=\"cart_item\">";
+        while($row = $result->fetch_assoc()){
+                $phoneID=$row['IDTelefon'];
+                $imgLoc=$row['LocImagine'];
+                $phoneName=$row["Nume"];
+                $bill=$row["PretLicitat"];
+                $purchaseDate=$row["DataLicitatie"];
+                $purchases=$purchases.<<<SINGLEPHONE
+                <td class="product-thumbnail">
+                    <a href="single-product.php?t=${phoneID}"><img width="145" height="145" alt="poster_1_up" class="shop_thumbnail" src="${imgLoc}"></a>
+                </td>
+
+                <td class="product-name">
+                    <a href="single-product.php?t=${phoneID}">${phoneName}</a> 
+                </td>
+
+                <td class="product-price">
+                    <span class="amount">${bill}</span> 
+                </td>
+
+                <td class="product-purchase-date">
+                    <span class="amount">${purchaseDate}</span> 
+                </td>
+SINGLEPHONE;
+}
+        $purchases=$purchases."</tr>";
+    } else 
+        $hasPurchased=False;
+    $stmt->close();
+} else error("Internal server error.");
+
+if(!$hasPurchased)
+    $purchases="<h1> No purchases yet. Ready to auction? </h1>";
+
+
+
+
+echo <<<BODYHTML
     <div class="single-product-area">
         <div class="zigzag-bottom"></div>
         <div class="container">
@@ -89,124 +62,27 @@
                 <div class="col-md-12">
                     <div class="product-content-right">
                         <div class="woocommerce">
-                            <form method="post" action="#">
-                                <table cellspacing="0" class="shop_table cart">
-                                    <thead>
-                                        <tr>
-                                            <th class="product-remove">&nbsp;</th>
-                                            <th class="product-thumbnail">&nbsp;</th>
-                                            <th class="product-name">Product</th>
-                                            <th class="product-price">Price</th>
-                                            <th class="product-quantity">Quantity</th>
-                                            <th class="product-subtotal">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr class="cart_item">
-                                            <td class="product-remove">
-                                                <a title="Remove this item" class="remove" href="#">×</a> 
-                                            </td>
-
-                                            <td class="product-thumbnail">
-                                                <a href="single-product.html"><img width="145" height="145" alt="poster_1_up" class="shop_thumbnail" src="img/product-thumb-2.jpg"></a>
-                                            </td>
-
-                                            <td class="product-name">
-                                                <a href="single-product.html">Ship Your Idea</a> 
-                                            </td>
-
-                                            <td class="product-price">
-                                                <span class="amount">£15.00</span> 
-                                            </td>
-
-                                            <td class="product-quantity">
-                                                <div class="quantity buttons_added">
-                                                    <input type="button" class="minus" value="-">
-                                                    <input type="number" size="4" class="input-text qty text" title="Qty" value="1" min="0" step="1">
-                                                    <input type="button" class="plus" value="+">
-                                                </div>
-                                            </td>
-
-                                            <td class="product-subtotal">
-                                                <span class="amount">£15.00</span> 
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td class="actions" colspan="6">
-                                                <div class="coupon">
-                                                    <label for="coupon_code">Coupon:</label>
-                                                    <input type="text" placeholder="Coupon code" value="" id="coupon_code" class="input-text" name="coupon_code">
-                                                    <input type="submit" value="Apply Coupon" name="apply_coupon" class="button">
-                                                </div>
-                                                <input type="submit" value="Update Cart" name="update_cart" class="button">
-                                                <input type="submit" value="Checkout" name="proceed" class="checkout-button button alt wc-forward">
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </form>
-
-                            <div class="cart-collaterals">
-
-                            <div class="cart_totals ">
-                                <h2>Cart Totals</h2>
-
-                                <table cellspacing="0">
-                                    <tbody>
-                                        <tr class="cart-subtotal">
-                                            <th>Cart Subtotal</th>
-                                            <td><span class="amount">£15.00</span></td>
-                                        </tr>
-
-                                        <tr class="shipping">
-                                            <th>Shipping and Handling</th>
-                                            <td>Free Shipping</td>
-                                        </tr>
-
-                                        <tr class="order-total">
-                                            <th>Order Total</th>
-                                            <td><strong><span class="amount">£15.00</span></strong> </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            </div>
+                            <table cellspacing="0" class="shop_table cart">
+                                <thead>
+                                    <tr>
+                                        <th class="product-thumbnail">Phone</th>
+                                        <th class="product-name">Name</th>
+                                        <th class="product-price">Price</th>
+                                        <th class="product-purchase-date">Date bougth</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                ${purchases}
+                                </tbody>
+                            </table>
                         </div>                        
                     </div>                    
                 </div>
             </div>
         </div>
     </div>
+BODYHTML;
 
-       <div class="footer-bottom-area">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-8">
-                    <div class="copyright">
-                        <p>Project's Opens Source Template: &copy; 2015 E-Commerce. todos los derechso reservados. <a href="https://jairandresdiazp.blogspot.com.co/" target="_blank">https://jairandresdiazp.blogspot.com.co/</a></p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div> <!-- End footer bottom area -->
-   
-   
-    <!-- Latest jQuery form server -->
-    <script src="https://code.jquery.com/jquery.min.js"></script>
-    
-    <!-- Bootstrap JS form CDN -->
-    <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    
-    <!-- jQuery sticky menu -->
-    <script src="js/owl.carousel.min.js"></script>
-    <script src="js/jquery.sticky.js"></script>
-    
-    <!-- jQuery easing -->
-    <script src="js/jquery.easing.1.3.min.js"></script>
-    
-    <!-- Main Script -->
-    <script src="js/main.js"></script>
-    <script type="text/javascript" src="js/menu.js"></script>
+echo $FOOTER;
 
-  </body>
-</html>
+?>
