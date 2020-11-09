@@ -26,9 +26,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $idt=filter("idtelefon",10,FILTER_VALIDATE_INT);
         $val=filter("valoare",14,FILTER_VALIDATE_INT);
 
-        $query = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ?";
+        $query = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ? AND DataLicitatie <= ?";
         if ($stmt = $conn->prepare($query)) {
-        $stmt->bind_param("i",$idt);
+        $stmt->bind_param("is",$idt,date("Y-m-d h:i:s"));
         $stmt->execute();
         $result = $stmt->get_result();
         $stmt->close();
@@ -43,11 +43,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 fwrite($f, date("Y-m-d h:i:s").",".$_SESSION['idU'].",".$val."\n");
                 fclose($f);
 
-            } else{
-                error("Pret mai mic decat cel minim!");
-            }
+            } else error("Price smaller than minimum!");
 
-        } else error("Internal Server Error.");
+        } else error("Auction did not start yet!");
 
 
     }else{
@@ -74,44 +72,26 @@ $stmt->close();
 } else error("Internal server error.");
 
 if ($result->num_rows > 0) {
-  // output data of each row
-  $row = $result->fetch_assoc(); 
-  $imageLocation=$row['LocImagine'];
-  $seller=$row["NumeFirma"];
-  $name=$row["Nume"];
-  $year=$row["AnAparitie"];
-  $initialPrice=$row["PretInitial"];
-  $sold=$row['Vandut'];
-  $phoneid=$_GET["t"];
-  $spec=$row["Specificatii"];
-    if($sold)
-        $price=<<<SOLD
-<div class="product-inner-category">
-    <p>VANDUT</p>
-</div> 
-SOLD;
-    else
-        $price=<<<PRICE
-<div class="product-inner-price">
-    <ins>Pret Initial: ${initialPrice} lei</ins>
-</div>
-<form action="" class="cart" method="post">
-    <label for="valoare">Licit (lei):</label> 
-    <input name="valoare" type="text">
-    <input name="idtelefon" type="text" value=${phoneid} hidden="True" >
-    <button class="add_to_cart_button" type="submit">Licita</button>
-</form>
-PRICE;
+    // output data of each row
+    $row = $result->fetch_assoc(); 
+    $imageLocation=$row['LocImagine'];
+    $seller=$row["NumeFirma"];
+    $name=$row["Nume"];
+    $year=$row["AnAparitie"];
+    $initialPrice=$row["PretInitial"];
+    $sold=$row['Vandut'];
+    $phoneid=$_GET["t"];
+    $spec=$row["Specificatii"];
+    $auctionDate=$row['DataLicitatie'];
 
-
-$auctions='';
-
-if(isset($_GET['t']))
-        $idt=$_GET['t'];
+    if(isset($_GET['t']))
+        $idtel=$_GET['t'];
     else 
-        $idt=$_POST['idtelefon'];
-    $idt ="./auction/".$idt.".csv";
+        $idtel=$_POST['idtelefon'];
+    $idt ="./auction/".$idtel.".csv";
     if(file_exists($idt)){
+        $auctionPannel='<li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Auctions</a></li>';
+        $auctions='<div role="tabpanel" class="tab-pane fade" id="profile"> <h2>Recent auctions:</h2>';
         $f=fopen($idt, "r");
         if($f !== FALSE){
         while (($data = fgetcsv($f, 1000, ",")) !== FALSE)
@@ -119,68 +99,93 @@ if(isset($_GET['t']))
         
         fclose($f);
         }
+        $auctions=$auctions.'</div>';
+    } else $auctionPannel='';
+
+    if($sold){
+        $query = "SELECT PretLicitat FROM Licitatie WHERE IDTelefon = ?";
+        if ($stmt = $conn->prepare($query)){
+            $stmt->bind_param("i",$idtel);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0){
+                $row = $result->fetch_assoc();
+                $auctionPrice=$row['PretLicitat'];
+                $price="<div class=\"product-inner-category\"><p>Sold at ${auctionPrice} lei</p></div>";
+            }
+        } else error("Internal server error.");
+    }
+    else{
+        if($auctionDate <= date("Y-m-d h:i:s"))
+            $price=<<<PRICE
+    <div class="product-inner-price">
+        <ins>Pret Initial: ${initialPrice} lei</ins>
+    </div>
+    <form action="" class="cart" method="post">
+        <label for="valoare">Licit (lei):</label> 
+        <input name="valoare" type="text">
+        <input name="idtelefon" type="text" value=${phoneid} hidden="True" >
+        <button class="add_to_cart_button" type="submit">Licita</button>
+    </form>
+PRICE;
+        else 
+            $auctions="Starting at: ${auctionDate}";
     }
 
+    echo $HEADER;
+    echo printHeader("Product");
+    echo <<<PART
+        <div class="single-product-area">
+            <div class="zigzag-bottom"></div>
+            <div class="container">
+                <div class="row">
+                        
+                    <div class="col-md-8">
+                        <div class="product-content-right">
 
-echo $HEADER;
-echo printHeader("Product");
-echo <<<PART
-    <div class="single-product-area">
-        <div class="zigzag-bottom"></div>
-        <div class="container">
-            <div class="row">
-                    
-                <div class="col-md-8">
-                    <div class="product-content-right">
+                Vandut de ${seller}
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <div class="product-images">
+                                        <div class="product-main-img">
+                                            <img src="${imageLocation}" alt="">
+                                        </div>
 
-            Vandut de ${seller}
-                        <div class="row">
-                            <div class="col-sm-6">
-                                <div class="product-images">
-                                    <div class="product-main-img">
-                                        <img src="${imageLocation}" alt="">
-                                    </div>
-
-                                    <div class="product-gallery">
-                                        <img src="${imageLocation}" alt="">
+                                        <div class="product-gallery">
+                                            <img src="${imageLocation}" alt="">
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                              
-                            <div class="col-sm-6">
-                                <div class="product-inner">
-                                    <h2 class="product-name">${name} - ${year}</h2>
-                                    ${price}
-                                     <div role="tabpanel">
-                                        <ul class="product-tab" role="tablist">
-                                            <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Description</a></li>
-                                            <li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Licitatii</a></li>
+                                  
+                                <div class="col-sm-6">
+                                    <div class="product-inner">
+                                        <h2 class="product-name">${name} - ${year}</h2>
+                                        ${price}
+                                         <div role="tabpanel">
+                                            <ul class="product-tab" role="tablist">
+                                                <li role="presentation" class="active"><a href="#home" aria-controls="home" role="tab" data-toggle="tab">Description</a></li>
+                                                ${auctionPannel}
 
-                                        </ul>
-                                    
-                                        <div class="tab-content">
-                                            <div role="tabpanel" class="tab-pane fade in active" id="home">
-                                                <h2>Product Description</h2>  
-                                                ${spec}
-                                            </div>
-  
-
-
-                                            <div role="tabpanel" class="tab-pane fade" id="profile">
-                                                <h2>Licitatii</h2>
-                                            ${auctions}
+                                            </ul>
+                                        
+                                            <div class="tab-content">
+                                                <div role="tabpanel" class="tab-pane fade in active" id="home">
+                                                    <h2>Product Description</h2>  
+                                                    ${spec}
+                                                </div>
+      
+                                                ${auctions}
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>                    
+                        </div>                    
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
 PART;
-}
-else error("Invalid phone id.");
+} else error("Invalid phone id.");
+
 echo $FOOTER;

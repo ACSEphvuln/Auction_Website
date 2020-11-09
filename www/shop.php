@@ -7,36 +7,42 @@ include_once 'accesscontrol.php';
 
 global $conn;
 
-$sql = "SELECT IDTelefon, LocImagine,Nume,PretInitial,Vandut FROM Telefon";
+$sql = "SELECT IDTelefon, LocImagine,Nume,PretInitial,Vandut, DataLicitatie FROM Telefon";
 $result = $conn->query($sql);
 $phones='';
 if ($result->num_rows > 0) {
-  // output data of each row
   while($row = $result->fetch_assoc()) {
     $imgLocation=$row['LocImagine'];
     $name=$row['Nume'];
-    
     $initialPrice=$row['PretInitial'];
     $phoneID=$row['IDTelefon'];
+    $auctionDate=$row['DataLicitatie'];
 
-    if(!$row["Vandut"])
-        $price =" <div class=\"product-carousel-price\"><ins>Pret initial: ${initialPrice} lei</ins></div> ";
-    else
-        $price = "VANDUT";
+    $auctionStatus='';
+    if($row["Vandut"])
+        $price = "SOLD";
+    else{
+        $price =" <div class=\"product-carousel-price\"><ins>Starting price: ${initialPrice} lei</ins></div> ";
+        if($auctionDate <= date("Y-m-d h:i:s"))
+            $auctionStatus='Started NOW!';
+        else 
+            $auctionStatus="Starting at: ${auctionDate}";
+    }
 
-$phones=$phones. <<<PHONE
-<div class="col-md-3 col-sm-6">
-    <div class="single-shop-product">
-        <div class="product-upper">
-            <img src=${imgLocation}>
-        </div>
-        <h2><a href="">${name}</a></h2>
+    $phones=$phones.<<<PHONE
+    <div class="col-md-3 col-sm-6">
+        <div class="single-shop-product">
+            <div class="product-upper">
+                <img src=${imgLocation}>
+            </div>
+            <h2><a href="">${name}</a></h2>
+            ${auctionStatus}
             ${price}
-        <div class="product-option-shop">
-            <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href="single-product.php?t=${phoneID}" >Detalii</a>
-        </div>                       
+            <div class="product-option-shop">
+                <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href="single-product.php?t=${phoneID}" >Detalii</a>
+            </div>                       
+        </div>
     </div>
-</div>
 PHONE;
  }
 }
