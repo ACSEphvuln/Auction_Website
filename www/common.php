@@ -30,6 +30,46 @@ function filter($input,$inputMaxLen,$filterType,$method="POST"){
 
   return $input;
 }
+class FancyTable{
+  private $numcol;
+  private $tableColumns;
+  private $tableHeader;
+  private $numrows=0;
+
+  public function __construct($numcol,$tableHeader){
+    $this->numcol=$numcol;
+    $this->tableHeader=$tableHeader;
+    $this->tableColumns=Array();
+  }
+  public function appendRow($row){
+    if(is_array($row))
+      if(count($row)==$this->numcol){
+        array_push($this->tableColumns,$row);
+        $this->numrows++;
+      } else error("Invalid number of columns at FancyTable, given".count($row)." expecting ".$this->numcol);
+  }
+
+  public function getHTML(){
+    $table='';
+    $table=$table. '<table cellspacing="0" class="shop_table cart"><thead><tr>';
+    for ($i=0; $i <$this->numcol ; $i++) { 
+      $table=$table. '<th>'.$this->tableHeader[$i].'</th>';
+    }
+    $table=$table. '</tr></thead>';
+
+    $table=$table. '<tbody>';
+    for ($i=0; $i <$this->numrows ; $i++) { 
+      $table=$table. '<tr>';
+      for ($j=0; $j <$this->numcol ; $j++) {
+        $table=$table. '<td>'.$this->tableColumns[$i][$j].'</td>';
+      }
+      $table=$table. '</tr>';
+    }
+    $table=$table. '</tbody></table>';
+    return $table;
+  }
+
+}
 
 $HEADER=<<<'HEADERHTML'
 <!DOCTYPE html>

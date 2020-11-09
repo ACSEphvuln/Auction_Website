@@ -17,32 +17,21 @@ if ($stmt = $conn->prepare($query)) {
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0){
-        $purchases="<tr class=\"cart_item\">";
+        $purchases='';
+
+        $pur = new FancyTable(4,Array('Phone','Name','Price','Date bougth'));
         while($row = $result->fetch_assoc()){
-                $phoneID=$row['IDTelefon'];
-                $imgLoc=$row['LocImagine'];
-                $phoneName=$row["Nume"];
-                $bill=$row["PretLicitat"];
-                $purchaseDate=$row["DataLicitatie"];
-                $purchases=$purchases.<<<SINGLEPHONE
-                <td class="product-thumbnail">
-                    <a href="single-product.php?t=${phoneID}"><img width="145" height="145" alt="poster_1_up" class="shop_thumbnail" src="${imgLoc}"></a>
-                </td>
+            $phoneID=$row['IDTelefon'];
+            $imgLoc=$row['LocImagine'];
+            $phoneName=$row["Nume"];
+            $bill=$row["PretLicitat"];
+            $purchaseDate=$row["DataLicitatie"];
 
-                <td class="product-name">
-                    <a href="single-product.php?t=${phoneID}">${phoneName}</a> 
-                </td>
-
-                <td class="product-price">
-                    <span class="amount">${bill}</span> 
-                </td>
-
-                <td class="product-purchase-date">
-                    <span class="amount">${purchaseDate}</span> 
-                </td>
-SINGLEPHONE;
-}
-        $purchases=$purchases."</tr>";
+            $thumbnail="<a href=\"single-product.php?t=${phoneID}\"><img width=\"50\" height=\"50\" alt=\"poster_1_up\" class=\"shop_thumbnail\" src=\"${imgLoc}\"></a>";
+            $name="<a href=\"single-product.php?t=${phoneID}\">${phoneName}</a>";
+            $pur->appendRow(Array($thumbnail,$name,$bill,$purchaseDate));
+        }
+        $purchases=$pur->getHTML();
     } else 
         $hasPurchased=False;
     $stmt->close();
@@ -62,19 +51,7 @@ echo <<<BODYHTML
                 <div class="col-md-12">
                     <div class="product-content-right">
                         <div class="woocommerce">
-                            <table cellspacing="0" class="shop_table cart">
-                                <thead>
-                                    <tr>
-                                        <th class="product-thumbnail">Phone</th>
-                                        <th class="product-name">Name</th>
-                                        <th class="product-price">Price</th>
-                                        <th class="product-purchase-date">Date bougth</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                ${purchases}
-                                </tbody>
-                            </table>
+                            ${purchases}
                         </div>                        
                     </div>                    
                 </div>

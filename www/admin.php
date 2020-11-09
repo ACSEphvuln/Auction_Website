@@ -76,25 +76,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 $sql = "SELECT  V.NumeFirma,T.Nume, T.PretInitial, T.DataLicitatie FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.Vandut = False AND T.DataLicitatie < NOW()";
 $result = $conn->query($sql);
-$tab='';
-$datalist='<datalist id="auction">';
 if ($result->num_rows > 0) {
-	$tab="<table style=\"width:100%\"><tr><td>Nume Firma</td><td>Nume Telefon</td><td>Pret Initial</td><td>Data Inceput Licitiatie</td> </tr>";
-  // output data of each row
+$tableAuction='';
+$datalist='<datalist id="auction">';
+	$tab=new FancyTable(4,Array('Seller','Phone Name','Starting Price','Started at'));
 	while($row = $result->fetch_assoc()){
 		$name=$row['Nume'];
-		$datalist=$datalist."<option value=\"${name}\">";
-		$tab=$tab."<tr>";
-		foreach ($row as $value) {
-			$tab=$tab."<td>".$value."</td>";
-		}
-		$tab=$tab."</tr>";
+		$datailist=$datalist."<option value=\"${name}\">";
+		$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
 	}
-
-	$tab=$tab."</table>";
-}
-
+	$tableAuction=$tab->getHTML();
 $datalist=$datalist."</datalist>";
+}
 
 $BODY=<<<BODY
 <center>
@@ -104,7 +97,7 @@ $BODY=<<<BODY
 	<input list="auction" name="auction">
 	${datalist}
 	<input type="submit" value="END" id="END" name="END" class="button" >
-	${tab}
+	${tableAuction}
 </form>
 </center>
 BODY;
