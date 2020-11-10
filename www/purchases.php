@@ -19,7 +19,7 @@ if ($stmt = $conn->prepare($query)) {
     if ($result->num_rows > 0){
         $purchases='';
 
-        $pur = new FancyTable(4,Array('Phone','Name','Price','Date bougth'));
+        $pur = new FancyTable(Array('Phone','Name','Price','Date bougth'));
         while($row = $result->fetch_assoc()){
             $phoneID=$row['IDTelefon'];
             $imgLoc=$row['LocImagine'];

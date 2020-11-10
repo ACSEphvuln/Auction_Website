@@ -36,9 +36,9 @@ class FancyTable{
   private $tableHeader;
   private $numrows=0;
 
-  public function __construct($numcol,$tableHeader){
-    $this->numcol=$numcol;
+  public function __construct($tableHeader){
     $this->tableHeader=$tableHeader;
+    $this->numcol=count($tableHeader);
     $this->tableColumns=Array();
   }
   public function appendRow($row){

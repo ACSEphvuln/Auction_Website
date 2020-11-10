@@ -93,7 +93,7 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
 $tableAuction='';
 $datalist='<datalist id="auction">';
-	$tab=new FancyTable(4,Array('Seller','Phone Name','Starting Price','Started at'));
+	$tab=new FancyTable(Array('Seller','Phone Name','Starting Price','Started at'));
 	while($row = $result->fetch_assoc()){
 		$datalist=$datalist."<option value=\"".$row['Nume']."\">";
 		$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
@@ -107,7 +107,7 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
 $tableUsers='';
 $datalistUser='<datalist id="CNP">';
-	$tab=new FancyTable(5,Array('Email','Last Name','Frist Name','CNP','Card(?)'));
+	$tab=new FancyTable(Array('Email','Last Name','Frist Name','CNP','Card(?)'));
 	while($row = $result->fetch_assoc()){
 		$datalistUser=$datalistUser."<option value=\"".$row['CNP']."\">";
 		
