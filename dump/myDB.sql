@@ -41,7 +41,7 @@ CREATE TABLE `Persoana` (
 	`Adresa` VARCHAR(80) NOT NULL,
 	PRIMARY KEY(`IDUtilizator`),
 	UNIQUE(CNP),
-	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`),
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`) ON DELETE CASCADE,
 	FOREIGN KEY (`IDCard`) REFERENCES Card(`IDCard`)
 );
 
@@ -76,13 +76,14 @@ CREATE TABLE `Telefon` (
 
 #-- Tabela Licitatii ( Utilizator N:N Telefon)
 CREATE TABLE `Licitatie` (
-	`IDUtilizator` INT unsigned NOT NULL, 
+	`IDLicitatie`  INT unsigned NOT NULL AUTO_INCREMENT,
+	`IDUtilizator` INT unsigned, 
 	`IDTelefon` INT unsigned NOT NULL,
 	`PretLicitat` DECIMAL(10,2) NOT NULL,
 	`DataLicitatie` DATETIME DEFAULT NOW(),
 	
-	PRIMARY KEY (`IDUtilizator`, `IDTelefon`),
-	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`),
+	PRIMARY KEY (`IDLicitatie`),
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`) ON DELETE SET NULL,
 	FOREIGN KEY (`IDTelefon`) REFERENCES Telefon(`IDTelefon`)
 );
 #-- IDUtilizator = Cumparator
