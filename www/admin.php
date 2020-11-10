@@ -84,6 +84,16 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		} else error("Bad delete syntax.");
 		
 
+	} else if($_POST['ACTION']=='DELETECARD'){
+		$IDCard=filter("IDCard",50,FILTER_SANITIZE_NUMBER_INT);
+
+		$query="DELETE FROM Card WHERE IDCard = ?";
+		if ($stmt = $conn->prepare($query)) {
+			$stmt->bind_param("i",$IDCard);
+			$stmt->execute();
+			$stmt->close();
+		} else error("Bad delete syntax.");
+		
 	}
 }
 
@@ -93,13 +103,25 @@ $result = $conn->query($sql);
 if ($result->num_rows > 0) {
 $tableAuction='';
 $datalist='<datalist id="auction">';
-	$tab=new FancyTable(Array('Seller','Phone Name','Starting Price','Started at'));
-	while($row = $result->fetch_assoc()){
-		$datalist=$datalist."<option value=\"".$row['Nume']."\">";
-		$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
-	}
+$tab=new FancyTable(Array('Seller','Phone Name','Starting Price','Started at'));
+while($row = $result->fetch_assoc()){
+	$datalist=$datalist."<option value=\"".$row['Nume']."\">";
+	$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
+}
 	$tableAuction=$tab->getHTML();
 $datalist=$datalist."</datalist>";
+
+$endAuctionForm=<<<ENDAUCTIONFORM
+<form id="login-form-wrap" method="post">
+
+	<p>End and bill auctions:</p>
+	<input list="auction" name="auction">
+	${datalist}
+	<input type="submit" value="ENDAUCTION" id="ACTION" name="ACTION" class="button" >
+	${tableAuction}
+</form>
+ENDAUCTIONFORM;
+
 }
 
 $sql = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.IDCard  FROM Utilizator U INNER JOIN Persoana P ON U.IDUtilizator = P.IDUtilizator";
@@ -119,6 +141,31 @@ $datalistUser='<datalist id="CNP">';
 	}
 	$tableUsers=$tab->getHTML();
 $datalistUser=$datalistUser."</datalist>";
+}
+
+
+$sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana P ON C.IDCard =P.IDCard  WHERE P.IDUtilizator IS NULL";
+$result = $conn->query($sql);
+if ($result->num_rows > 0) {
+$orphanedCards='';
+$datalistCard='<datalist id="IDCard">';
+$tab=new FancyTable(Array("IDCard","Propietar","Exp"));
+	while($row = $result->fetch_assoc()){
+		$datalistCard=$datalistCard."<option value=".$row['IDCard'].">";
+		$tab->appendRow(Array($row['IDCard'],$row['Propietar'],$row['Exp']));
+	}
+$datalistCard=$datalistCard."</datalist>";
+$orphanedCards=$orphanedCards.$datalistCard.$tab->getHTML();
+$deleteCardForm=<<<DELCARD
+<form id="login-form-wrap" method="post">
+
+	<p>Remove temporary Held Cards: </p>
+	<input list="IDCard" name="IDCard">
+	${datalistCard}
+	<input type="submit" value="DELETECARD" id="ACTION" name="ACTION" class="button" >
+	${orphanedCards}
+</form>
+DELCARD;
 }
 
 
@@ -143,15 +190,9 @@ $BODY=<<<BODY
 <center>
 Number of registered users: ${buyers} <br/>
 Number of registered sellers: ${sellers} <br/>
-<form id="login-form-wrap" method="post">
 
-	<p>End and bill auctions:</p>
-	<input list="auction" name="auction">
-	${datalist}
-	<input type="submit" value="ENDAUCTION" id="ACTION" name="ACTION" class="button" >
-	${tableAuction}
-</form>
-
+${endAuctionForm}
+${deleteCardForm}
 <form id="login-form-wrap" method="post">
 
 	<p>Delete user:</p>
@@ -160,6 +201,7 @@ Number of registered sellers: ${sellers} <br/>
 	<input type="submit" value="DELETEUSER" id="ACTION" name="ACTION" class="button" >
 	${tableUsers}
 </form>
+
 </center>
 BODY;
 

@@ -23,8 +23,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     $row = $result->fetch_assoc();
 
     if ($row['IDCard'] != NULL) {
-        $idt=filter("idtelefon",10,FILTER_VALIDATE_INT);
-        $val=filter("valoare",14,FILTER_VALIDATE_INT);
+        $idt=filter("idtelefon",10,FILTER_SANITIZE_NUMBER_INT);
+        $val=filter("valoare",14,FILTER_SANITIZE_NUMBER_INT);
 
         $query = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ? AND DataLicitatie <= ?";
         if ($stmt = $conn->prepare($query)) {
@@ -60,8 +60,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 
 $id_tel=trim($_GET["t"]);
-$id_tel=filter_var($id_tel, FILTER_VALIDATE_INT);
-if (!filter_var($id_tel, FILTER_VALIDATE_INT)) 
+$id_tel=filter_var($id_tel, FILTER_SANITIZE_NUMBER_INT);
+if (!filter_var($id_tel, FILTER_SANITIZE_NUMBER_INT)) 
     error("Internal Server Error.");
 $query = "SELECT T.*, V.NumeFirma FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.IDTelefon = ?";
 if ($stmt = $conn->prepare($query)) {
