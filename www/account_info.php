@@ -46,7 +46,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else error("Internal server error at Insert.");*/
 
     // Link the card with the person 
-    $query="UPDATE Persoana SET IDCard = (SELECT Card FROM (SELECT * FROM Card WHERE CCV = ? AND  Detalii= ? AS C) WHERE IDUtilizator = ?";
+    $query="UPDATE Persoana SET IDCard = (SELECT Card FROM (SELECT * FROM Card WHERE CCV = ? AND  Detalii= ? AS C)) WHERE IDUtilizator = ?";
     if ($stmt = $conn->prepare($query)) {
         $stmt->bind_param("ssi",$ccv,$details,$_SESSION['idU']);
         $stmt->execute();
