@@ -3,14 +3,16 @@ include_once 'common.php';
 include_once 'db_connect.php';
 include_once 'accesscontrol.php';
 
+// Only print the page if user is logged in as the administrator. Ignoring indentation
 if($_SESSION['idU']==1){
 
+// Reference db_connect connection to sql server
 global $conn;
 
-
-
+// Action performed on database
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
+	// End a live auction by a supplied Phone Name
 	if($_POST['ACTION']=='ENDAUCTION'){
 		$phoneName=filter("auction",50,FILTER_SANITIZE_STRING);
 		$idUser=0;
@@ -18,28 +20,33 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		$date="";
 		$phoneID=0;
 
+		// Test if the action can be closed and get phone id.
 		$query="SELECT IDTelefon,Vandut,DataLicitatie FROM Telefon WHERE Nume = ?";
 		if ($stmt = $conn->prepare($query)) {
 			$stmt->bind_param("s",$phoneName);
 			$stmt->execute();
 
 			$result = $stmt->get_result();
+			// No phone with the post name
 			if($result->num_rows === 0 ) 
 			    error("Phone not found.");
 			$row = $result->fetch_assoc();
 			$stmt->close();
 
+			// Check if phone sold
 			if($row["Vandut"]==True)
 				error("Phone already sold!");
 
+			// Check if phone is in a live auction
 			if($row["DataLicitatie"] > date("Y-m-d h:i:s"))
 				error("Auction did not start yet!");
 
+			// Store the phone id
 			$phoneID=$row["IDTelefon"];
 		} else error("Internal server error at select query.");
 
 
-		//Searching for winning auction
+		//Search for winning auction
 		$max=0;
 		$idt=$phoneID;
 	    $idt ="./auction/".$idt.".csv";
@@ -57,14 +64,15 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	    } else error("No auctions!");
 
 
-		$query="INSERT INTO Licitatie(IDUtilizator,IDTelefon,PretLicitat,DataLicitatie) SELECT ?,Telefon.IDTelefon,?,? FROM Telefon WHERE Telefon.IDTelefon = ?";
+	    // Make an entry in the Auctions DB Table with the winning auction
+		$query="INSERT INTO Licitatie(IDUtilizator,IDTelefon,PretLicitat,DataLicitatie) SELECT ?,T.IDTelefon,?,? FROM Telefon T WHERE T.IDTelefon = ?";
 		if ($stmt = $conn->prepare($query)) {
 			$stmt->bind_param("idss",$idUser, $price, $date, $phoneID);
 			$stmt->execute();
 			$stmt->close();
 		} else error("Internal server error at insert query.");
 
-		//$query="UPDATE Telefon SET Vandut = True WHERE IDTelefon = (SELECT IDTelefon FROM (SELECT * FROM Telefon) AS A WHERE Nume = ?)";
+		// Update the phone as sold
 		$query="UPDATE Telefon SET Vandut = True WHERE IDTelefon = ?";
 		if ($stmt = $conn->prepare($query)) {
 			//$stmt->bind_param("s",$phoneName);
@@ -73,6 +81,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			$stmt->close();
 		} else error("Internal server error at update query.");
 
+	//  Delete a user by a supplied CNP. Note: temporary keeping the card details for security measures
 	} else if($_POST['ACTION']=='DELETEUSER'){
 		$CNP=filter("CNP",13,FILTER_SANITIZE_STRING);
 
@@ -81,9 +90,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			$stmt->bind_param("s",$CNP);
 			$stmt->execute();
 			$stmt->close();
-		} else error("Bad delete syntax.");
+		} else error("Internal server error at delete.");
 		
-
+	// Delete orphaned card by supplied Card ID
 	} else if($_POST['ACTION']=='DELETECARD'){
 		$IDCard=filter("IDCard",50,FILTER_SANITIZE_NUMBER_INT);
 
@@ -92,43 +101,43 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			$stmt->bind_param("i",$IDCard);
 			$stmt->execute();
 			$stmt->close();
-		} else error("Bad delete syntax.");
+		} else error("Internal server error at delete.");
 		
 	}
 }
 
-
+// Make a table with all the live auctions
 $sql = "SELECT  V.NumeFirma,T.Nume, T.PretInitial, T.DataLicitatie FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.Vandut = False AND T.DataLicitatie < NOW()";
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
-$tableAuction='';
-$datalist='<datalist id="auction">';
-$tab=new FancyTable(Array('Seller','Phone Name','Starting Price','Started at'));
-while($row = $result->fetch_assoc()){
-	$datalist=$datalist."<option value=\"".$row['Nume']."\">";
-	$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
-}
-	$tableAuction=$tab->getHTML();
-$datalist=$datalist."</datalist>";
+	$tableAuction='';
+	$datalist='<datalist id="auction">';
+	$tab=new FancyTable(Array('Seller','Phone Name','Starting Price','Started at'));
+	while($row = $result->fetch_assoc()){
+		$datalist=$datalist."<option value=\"".$row['Nume']."\">";
+		$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
+	}
+		$tableAuction=$tab->getHTML();
+	$datalist=$datalist."</datalist>";
 
-$endAuctionForm=<<<ENDAUCTIONFORM
-<form id="login-form-wrap" method="post">
+	$endAuctionForm=<<<ENDAUCTIONFORM
+	<form id="login-form-wrap" method="post">
 
-	<p>End and bill auctions:</p>
-	<input list="auction" name="auction">
-	${datalist}
-	<input type="submit" value="ENDAUCTION" id="ACTION" name="ACTION" class="button" >
-	${tableAuction}
-</form>
+		<p>End and bill auctions:</p>
+		<input list="auction" name="auction">
+		${datalist}
+		<input type="submit" value="ENDAUCTION" id="ACTION" name="ACTION" class="button" >
+		${tableAuction}
+	</form>
 ENDAUCTIONFORM;
-
 }
 
+// Make a table with all users from Person Table
 $sql = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.IDCard  FROM Utilizator U INNER JOIN Persoana P ON U.IDUtilizator = P.IDUtilizator";
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
-$tableUsers='';
-$datalistUser='<datalist id="CNP">';
+	$tableUsers='';
+	$datalistUser='<datalist id="CNP">';
 	$tab=new FancyTable(Array('Email','Last Name','Frist Name','CNP','Card(?)'));
 	while($row = $result->fetch_assoc()){
 		$datalistUser=$datalistUser."<option value=\"".$row['CNP']."\">";
@@ -140,35 +149,35 @@ $datalistUser='<datalist id="CNP">';
 		$tab->appendRow(Array($row['Email'],$row['Nume'],$row['Prenume'],$row['CNP'],$card));
 	}
 	$tableUsers=$tab->getHTML();
-$datalistUser=$datalistUser."</datalist>";
+	$datalistUser=$datalistUser."</datalist>";
 }
 
-
+// Make table with temporary held cards
 $sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana P ON C.IDCard =P.IDCard  WHERE P.IDUtilizator IS NULL";
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
-$orphanedCards='';
-$datalistCard='<datalist id="IDCard">';
-$tab=new FancyTable(Array("IDCard","Propietar","Exp"));
+	$orphanedCards='';
+	$datalistCard='<datalist id="IDCard">';
+	$tab=new FancyTable(Array("IDCard","Propietar","Exp"));
 	while($row = $result->fetch_assoc()){
 		$datalistCard=$datalistCard."<option value=".$row['IDCard'].">";
 		$tab->appendRow(Array($row['IDCard'],$row['Propietar'],$row['Exp']));
 	}
-$datalistCard=$datalistCard."</datalist>";
-$orphanedCards=$orphanedCards.$datalistCard.$tab->getHTML();
-$deleteCardForm=<<<DELCARD
-<form id="login-form-wrap" method="post">
+	$datalistCard=$datalistCard."</datalist>";
+	$orphanedCards=$orphanedCards.$datalistCard.$tab->getHTML();
+	$deleteCardForm=<<<DELCARD
+	<form id="login-form-wrap" method="post">
 
-	<p>Remove temporary Held Cards: </p>
-	<input list="IDCard" name="IDCard">
-	${datalistCard}
-	<input type="submit" value="DELETECARD" id="ACTION" name="ACTION" class="button" >
-	${orphanedCards}
-</form>
+		<p>Remove temporary Held Cards: </p>
+		<input list="IDCard" name="IDCard">
+		${datalistCard}
+		<input type="submit" value="DELETECARD" id="ACTION" name="ACTION" class="button" >
+		${orphanedCards}
+	</form>
 DELCARD;
 }
 
-
+// Show how many users the application servers
 $sql = "SELECT COUNT(*) AS NumPers FROM Persoana";
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
@@ -176,7 +185,7 @@ if ($result->num_rows > 0) {
 	$buyers=$row["NumPers"];
 }
 
-
+// Show how many sellers the application servers
 $sql = "SELECT COUNT(*) AS NumSel FROM Vanzator";
 $result = $conn->query($sql);
 if ($result->num_rows > 0) {
@@ -186,7 +195,10 @@ if ($result->num_rows > 0) {
 
 
 
-$BODY=<<<BODY
+
+echo $HEADER;
+echo printHeader("Administrative pannel");
+echo <<<BODY
 <center>
 Number of registered users: ${buyers} <br/>
 Number of registered sellers: ${sellers} <br/>
@@ -194,7 +206,6 @@ Number of registered sellers: ${sellers} <br/>
 ${endAuctionForm}
 ${deleteCardForm}
 <form id="login-form-wrap" method="post">
-
 	<p>Delete user:</p>
 	<input list="CNP" name="CNP">
 	${datalistUser}
@@ -204,12 +215,6 @@ ${deleteCardForm}
 
 </center>
 BODY;
-
-
-echo $HEADER;
-echo printHeader("Administrative pannel");
-echo $BODY;
-
 echo $FOOTER;
 
 

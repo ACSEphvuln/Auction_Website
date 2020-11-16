@@ -1,10 +1,13 @@
-<?php // common.php
+<?php 
+/* Common functions used to serve the webapp*/
 
+// Raise an error and go back
 function error($msg) {
   echo "<script language=\"JavaScript\">alert(\"${msg}\");history.back();</script>";
   exit;
 }
 
+// Filter input
 function filter($input,$inputMaxLen,$filterType,$method="POST"){
   $inputName=$input;
   if($method == "POST"){
@@ -30,6 +33,8 @@ function filter($input,$inputMaxLen,$filterType,$method="POST"){
 
   return $input;
 }
+
+// Generate a new HTML table that will be returned as a string
 class FancyTable{
   private $numcol;
   private $tableColumns;
@@ -71,6 +76,7 @@ class FancyTable{
 
 }
 
+// Header used in all pages
 $HEADER=<<<'HEADERHTML'
 <!DOCTYPE html>
 <!--
@@ -144,7 +150,7 @@ $HEADER=<<<'HEADERHTML'
     </div>
 HEADERHTML;
 
-
+// Specific header used per page indicating title
 function PrintHeader($headername){
 return <<<PrintHeaderHTML
     <div class="product-big-title-area">
@@ -161,8 +167,8 @@ return <<<PrintHeaderHTML
 PrintHeaderHTML;
 }
 
+// Footer contained in all pages
 $FOOTER=<<<'FOOTERHTML'
-
     <div class="footer-bottom-area">
         <div class="container">
             <div class="row">

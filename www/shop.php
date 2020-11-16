@@ -3,10 +3,9 @@ include_once 'db_connect.php';
 include_once 'common.php';
 include_once 'accesscontrol.php';
 
-
-
 global $conn;
 
+// Show all phones
 $sql = "SELECT IDTelefon, LocImagine,Nume,PretInitial,Vandut, DataLicitatie FROM Telefon";
 $result = $conn->query($sql);
 $phones='';
@@ -29,6 +28,7 @@ if ($result->num_rows > 0) {
             $auctionStatus="Starting at: ${auctionDate}";
     }
 
+    // Add phone to view
     $phones=$phones.<<<PHONE
     <div class="col-md-3 col-sm-6">
         <div class="single-shop-product">
@@ -53,36 +53,35 @@ PHONE;
 echo $HEADER;
 echo PrintHeader("Shop");
 echo <<<SHOPPAGE
-    <div class="single-product-area">
-        <div class="zigzag-bottom"></div>
-        <div class="container">
-            <div class="row">
-            ${phones}
-            </div>
-            
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="product-pagination text-center">
-                        <nav>
-                          <ul class="pagination">
-                            <li>
-                              <a aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                              </a>
-                            </li>
-                            <li><a href="#">1</a></li>
-                            <li>
-                              <a  aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                              </a>
-                            </li>
-                          </ul>
-                        </nav>                        
-                    </div>
+<div class="single-product-area">
+    <div class="zigzag-bottom"></div>
+    <div class="container">
+        <div class="row">
+        ${phones}
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <div class="product-pagination text-center">
+                    <nav>
+                      <ul class="pagination">
+                        <li>
+                          <a aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                          </a>
+                        </li>
+                        <li><a href="#">1</a></li>
+                        <li>
+                          <a  aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                          </a>
+                        </li>
+                      </ul>
+                    </nav>                        
                 </div>
             </div>
         </div>
     </div>
+</div>
 SHOPPAGE;
 echo $FOOTER;
 

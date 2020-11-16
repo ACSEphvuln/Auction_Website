@@ -5,6 +5,7 @@ include_once 'accesscontrol.php';
 
 global $conn;
 
+// Auction
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
     if(!isset($_SESSION['idU']))
@@ -42,23 +43,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
                 $f = fopen("./auction/".$idt.".csv", "a") or die("Unable to open file!");
                 fwrite($f, date("Y-m-d h:i:s").",".$_SESSION['idU'].",".$val."\n");
                 fclose($f);
-
             } else error("Price smaller than minimum!");
 
         } else error("Auction did not start yet!");
 
+    }else error("Introduce card details before in section Account Information.");
 
-    }else{
-        error("Introduce card details before in section Account Information.");
-    }
   }
-
-
 
 }
 
 
-
+// Show phone information
 $id_tel=trim($_GET["t"]);
 $id_tel=filter_var($id_tel, FILTER_SANITIZE_NUMBER_INT);
 if (!filter_var($id_tel, FILTER_SANITIZE_NUMBER_INT)) 

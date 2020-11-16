@@ -6,6 +6,7 @@ services:
       - backend
     volumes:
       - ./www/:/var/www/html/
+    #Temporary file system used for CSV auction files
     tmpfs:
       - /var/www/html/auction/
   apache:
