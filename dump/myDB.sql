@@ -24,9 +24,9 @@ CREATE TABLE `Utilizator` (
 CREATE TABLE `Card` (
 	`IDCard` INT unsigned NOT NULL AUTO_INCREMENT,
 	`Propietar` VARCHAR(50) NOT NULL,
-	`Exp` DATE NOT NULL,
-	`Detalii` VARCHAR(50) NOT NULL,
-	`CCV` VARCHAR(50),
+	`Exp` CHAR(5) NOT NULL,
+	`Detalii` CHAR(16) NOT NULL,
+	`CCV` VARCHAR(5),
 	PRIMARY KEY(`IDCard`)
 );
 
@@ -112,8 +112,8 @@ INSERT INTO `Vanzator` (`IDUtilizator`,`NumeFirma` ,`Adresa`,`IBAN` ,`CUI`,`NrTe
 
 
 INSERT INTO `Card` (`Propietar`, `Exp`, `Detalii`, `CCV`) VALUES
-('Admin', '4000-1-01', 'Card De Test','1.1.1.1'),
-('Banu Iliescu', '2020-6-13', '1396134821495123','521352');
+('Admin', '4000-1-01', '0000000000000000','1.1.1.1'),
+('Banu Iliescu', '2020-6-13', '1231231231231231','521352');
 
 INSERT INTO `Persoana` (`IDUtilizator`,`IDCard`, `Nume`, `Prenume`, `CNP`, `Adresa`) VALUES
 (1,1, 'Admin', 'A.', '0000000000000','127.0.0.1'),

@@ -15,13 +15,16 @@ global $conn;
 if($_SERVER["REQUEST_METHOD"] == "POST"){
     // Sanitise inputs
     $owner = filter('owner',50,FILTER_SANITIZE_STRING);
-    $details = filter('details',50,FILTER_SANITIZE_STRING);
-    $ccv = filter('ccv',50,FILTER_SANITIZE_STRING);
-    $date = filter('date',10,FILTER_DEFAULT);
+    $details = filter('details',16,FILTER_SANITIZE_STRING);
+    $ccv = filter('ccv',5,FILTER_SANITIZE_STRING);
+    $date = filter('date',5,FILTER_SANITIZE_STRING);
 
     // Date is parsed differently
-    if (!date_parse_from_format("Y-m-d", $date))
-      error("Bad expiration date format!");
+    if (!date_parse_from_format("y-m", $date))
+        error("Bad expiration date format!");
+
+    if(strlen($details) != 16)
+        error("Bad card details!");
 
     // Insert card details
     $query="INSERT INTO Card (Propietar, Exp, Detalii,CCV) VALUES(?,?,?,?)"; 
@@ -124,7 +127,7 @@ CARDDET;
         <input type="text" id="ccv" name="ccv" class="input-text">
     </p>
     <p class="form-row">
-        <label for="date">Expiration date (YYYY-MM-DD): <span class="required">*</span>
+        <label for="date">Expiration date (YY-MM): <span class="required">*</span>
         </label>
         <input type="text" id="date" name="date" class="input-text">
     </p>
