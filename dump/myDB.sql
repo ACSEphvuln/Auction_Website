@@ -112,8 +112,8 @@ INSERT INTO `Vanzator` (`IDUtilizator`,`NumeFirma` ,`Adresa`,`IBAN` ,`CUI`,`NrTe
 
 
 INSERT INTO `Card` (`Propietar`, `Exp`, `Detalii`, `CCV`) VALUES
-('Admin', '4000-1-01', '0000000000000000','1.1.1.1'),
-('Banu Iliescu', '2020-6-13', '1231231231231231','521352');
+('Admin', '99-12', '0000000000000000','00000'),
+('Banu Iliescu', '20-06', '1231231231231231','13731');
 
 INSERT INTO `Persoana` (`IDUtilizator`,`IDCard`, `Nume`, `Prenume`, `CNP`, `Adresa`) VALUES
 (1,1, 'Admin', 'A.', '0000000000000','127.0.0.1'),

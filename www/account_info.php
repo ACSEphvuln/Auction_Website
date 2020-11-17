@@ -23,6 +23,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if (!date_parse_from_format("y-m", $date))
         error("Bad expiration date format!");
 
+    if(strlen($date) != 5)
+        error("Bad expiration date format!");
+
     if(strlen($details) != 16)
         error("Bad card details!");
 
