@@ -46,7 +46,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else error("Internal server error at Insert.");*/
 
     // Link the card with the person 
-    $query="UPDATE Persoana SET IDCard = (SELECT Card FROM (SELECT * FROM Card WHERE CCV = ? AND  Detalii= ? AS C)) WHERE IDUtilizator = ?";
+    $query="UPDATE Persoana SET IDCard = (SELECT Card FROM (SELECT * FROM Card WHERE CCV = ? AND  Detalii= ?) AS C) WHERE IDUtilizator = ?";
     if ($stmt = $conn->prepare($query)) {
         $stmt->bind_param("ssi",$ccv,$details,$_SESSION['idU']);
         $stmt->execute();
@@ -61,7 +61,7 @@ $details='';
 $cardDetails='';
 
 // Print user details and store in $card if the user has a card
-$card=True;
+$card=False;
 $query = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.Adresa, P.IDCard FROM Utilizator U INNER JOIN Persoana P ON  U.IDUtilizator = P.IDUtilizator Where U.IDUtilizator = ?";
 if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("i",$_SESSION['idU']);
@@ -83,26 +83,27 @@ if ($stmt = $conn->prepare($query)) {
     <h3>Address:</h3> <h4> ${address}</h4>
 DETAILS;
         $card=$row["IDCard"];
-        if(!$card)
-            $card=False;
-
       }
     }
 } else error("Internat sever error.")
 // If user has a card, print some card details back to user
 if($card){
-    $sql = "SELECT Propietar, Exp, CCV FROM Card Where IDCard = \"" .$card. "\"";
-    $result = $conn->query($sql);
+    $query = "SELECT Propietar, Exp, CCV FROM Card Where IDCard = ?";
+    if ($stmt = $conn->prepare($query)) {
+        $stmt->bind_param("i",$card);
+        $stmt->execute();
+        $result = $stmt->get_result();
 
-    if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
-        $cardDetails=<<<CARDDET
-        <h3> Propietar card: <?php echo ${row["Propietar"]} ?></h3>
-        <h3>Exp: <?php echo ${row["Exp"]}?></h3>
-        <h3>CCV:</h3> <h4> <?php echo ${row["CCV"]}?></h4>
+        if ($result->num_rows > 0) {
+            while($row = $result->fetch_assoc()) {
+            $cardDetails=<<<CARDDET
+            <h3> Card owner: <?php echo ${row["Propietar"]} ?></h3>
+            <h3>Exp: <?php echo ${row["Exp"]}?></h3>
+            <h3>CCV:</h3> <h4> <?php echo ${row["CCV"]}?></h4>
 CARDDET;
-      }
-    }
+          }
+        }
+    }else error("Internal server error");
 // If user dose not have a card, print form where user can introduce card details
 } else $cardDetails=<<<ENTERCARD
 <div class="woocommerce-info">Ready to puchase? <a class="showlogin" data-toggle="collapse" href="#login-form-wrap" aria-expanded="false" aria-controls="login-form-wrap">Click here to add credit card details</a></div>
