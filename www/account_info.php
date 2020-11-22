@@ -26,7 +26,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(strlen($date) != 5)
         error("Bad expiration date format!");
 
-    if(strlen($details) != 16)
+    if(strlen($details) < 12)
         error("Bad card details!");
 
     // Insert card details
@@ -52,7 +52,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     } else error("Internal server error at Insert.");*/
 
     // Link the card with the person 
-    $query="UPDATE Persoana SET IDCard = (SELECT Card FROM (SELECT * FROM Card WHERE CCV = ? AND  Detalii= ?) AS C) WHERE IDUtilizator = ?";
+    $query="UPDATE Persoana SET IDCard = (SELECT IDCard FROM Card WHERE CCV = ? AND  Detalii= ?) WHERE IDUtilizator = ?";
     if ($stmt = $conn->prepare($query)) {
         $stmt->bind_param("ssi",$ccv,$details,$_SESSION['idU']);
         $stmt->execute();
@@ -68,19 +68,22 @@ $cardDetails='';
 
 // Print user details and store in $card if the user has a card
 $card=False;
-$query = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.Adresa, P.IDCard FROM Utilizator U INNER JOIN Persoana P ON  U.IDUtilizator = P.IDUtilizator Where U.IDUtilizator = ?";
+$query = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.Adresa, C.Propietar, C.Exp, C.CCV FROM Utilizator U INNER JOIN Persoana P ON  U.IDUtilizator = P.IDUtilizator  LEFT JOIN Card C ON C.IDCard = P.IDCard WHERE U.IDUtilizator = ?";
 if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("i",$_SESSION['idU']);
     $stmt->execute();
     $result = $stmt->get_result();
     if ($result->num_rows > 0) {
-        while($row = $result->fetch_assoc()) {
+        $row = $result->fetch_assoc();
         $lname=$row["Nume"];
         $email=$row["Email"];
         $CNP=$row["CNP"];
-        $card=$row["IDCard"];
         $fname=$row["Prenume"];
         $address=$row["Adresa"];
+        $prop=$row["Propietar"];
+        $CCV=$row["CCV"];
+        $exp=$row["Exp"];
+
         $details=
 <<<DETAILS
     <h3>Full name: ${lname} ${fname}</h3>
@@ -88,30 +91,16 @@ if ($stmt = $conn->prepare($query)) {
     <h3>CNP: ${CNP}</h3>
     <h3>Address:</h3> <h4> ${address}</h4>
 DETAILS;
-        $card=$row["IDCard"];
-      }
-    }
-} else error("Internat sever error.")
-// If user has a card, print some card details back to user
-if($card){
-    $query = "SELECT Propietar, Exp, CCV FROM Card Where IDCard = ?";
-    if ($stmt = $conn->prepare($query)) {
-        $stmt->bind_param("i",$card);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        if ($result->num_rows > 0) {
-            while($row = $result->fetch_assoc()) {
-            $cardDetails=<<<CARDDET
-            <h3> Card owner: <?php echo ${row["Propietar"]} ?></h3>
-            <h3>Exp: <?php echo ${row["Exp"]}?></h3>
-            <h3>CCV:</h3> <h4> <?php echo ${row["CCV"]}?></h4>
+        if($row["Propietar"] != NULL)
+        $cardDetails=
+<<<CARDDET
+        <h3> Card owner: ${prop}</h3>
+        <h3>Exp: ${exp}</h3>
+        <h3>CCV: ${CCV}</h3>
 CARDDET;
-          }
-        }
-    }else error("Internal server error");
-// If user dose not have a card, print form where user can introduce card details
-} else $cardDetails=<<<ENTERCARD
+        else 
+        $cardDetails=
+<<<ENTERCARD
 <div class="woocommerce-info">Ready to puchase? <a class="showlogin" data-toggle="collapse" href="#login-form-wrap" aria-expanded="false" aria-controls="login-form-wrap">Click here to add credit card details</a></div>
 <form id="login-form-wrap" class="login collapse" method="post">
     <p class="form-row">
@@ -139,6 +128,11 @@ CARDDET;
     </p>
 </form>
 ENTERCARD;
+    }
+} else error("Internal sever error.");
+
+// If user dose not have a card, print form where user can introduce card details
+
 
 echo $HEADER;
 echo PrintHeader("Account info");

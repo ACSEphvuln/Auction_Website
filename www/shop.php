@@ -39,7 +39,7 @@ if ($result->num_rows > 0) {
             ${auctionStatus}
             ${price}
             <div class="product-option-shop">
-                <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href="single-product.php?t=${phoneID}" >Detalii</a>
+                <a class="add_to_cart_button" data-quantity="1" data-product_sku="" data-product_id="70" rel="nofollow" href="single-product.php?t=${phoneID}" >Details</a>
             </div>                       
         </div>
     </div>

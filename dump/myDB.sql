@@ -25,8 +25,8 @@ CREATE TABLE `Card` (
 	`IDCard` INT unsigned NOT NULL AUTO_INCREMENT,
 	`Propietar` VARCHAR(50) NOT NULL,
 	`Exp` CHAR(5) NOT NULL,
-	`Detalii` CHAR(16) NOT NULL,
-	`CCV` VARCHAR(5),
+	`Detalii` VARCHAR(25) NOT NULL,
+	`CCV` VARCHAR(5) NOT NULL,
 	PRIMARY KEY(`IDCard`)
 );
 
