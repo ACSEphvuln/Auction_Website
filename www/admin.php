@@ -26,11 +26,6 @@ class ActionTable extends FancyTable{
 			$dataList='<datalist id="'.$tableKey.'">';
 			while($row = $result->fetch_assoc()){
 				$dataList=$dataList.'<option value="'.$row[$tableKey].'"">';
-				//$tableRow=Array();
-				//foreach ($columns as $c) {
-				//	$tableRow.push($row[$c]);
-				//}
-				//$this->appendRow($tableRow);
 				$this->appendRow(array_values($row));
 			}
 			$dataList=$dataList."</datalist>";
@@ -44,6 +39,22 @@ class ActionTable extends FancyTable{
 				${table}
 			</form>
 TABLEFORM;
+		}
+		return $form;
+	}
+
+	public function getQueryHTML($title,$conn,$sql){
+		$tableKey=$this->tableKey;
+		$result = $conn->query($sql);
+		if ($result->num_rows > 0) {
+			while($row = $result->fetch_assoc()){
+				$this->appendRow(array_values($row));
+			}
+			$table=$this->getTableHTML();
+			$form=<<<TABLE
+			<p>${title}</p>
+			${table}
+TABLE;
 		}
 		return $form;
 	}
@@ -151,78 +162,16 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 $sql = "SELECT  V.NumeFirma,T.Nume, T.PretInitial, T.DataLicitatie FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.Vandut = False AND T.DataLicitatie < NOW()";
 $auctionAction=new ActionTable(Array('Seller','Phone Name','Starting Price','Started at'),'Nume');
 $endAuctionForm=$auctionAction->getActionHTML('End and bill auctions:','ENDAUCTION',$conn,$sql);
-/*$result = $conn->query($sql);
-if ($result->num_rows > 0) {
-	$tableAuction='';
-	$datalist='<datalist id="auction">';
-	$tab=new FancyTable(Array('Seller','Phone Name','Starting Price','Started at'));
-	while($row = $result->fetch_assoc()){
-		$datalist=$datalist."<option value=\"".$row['Nume']."\">";
-		$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
-	}
-		$tableAuction=$tab->getTableHTML();
-	$datalist=$datalist."</datalist>";
-
-	$endAuctionForm=<<<ENDAUCTIONFORM
-	<form id="login-form-wrap" method="post">
-
-		<p>End and bill auctions:</p>
-		<input list="auction" name="auction">
-		${datalist}
-		<input type="submit" value="ENDAUCTION" id="ACTION" name="ACTION" class="button" >
-		${tableAuction}
-	</form>
-ENDAUCTIONFORM;
-}*/
 
 // Make a table with all users from Person Table
 $sql = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.IDCard  FROM Utilizator U INNER JOIN Persoana P ON U.IDUtilizator = P.IDUtilizator";
 $usersAction=new ActionTable(Array('Email','Last Name','Frist Name','CNP','Card ID'),'CNP');
 $deleteUserForm=$usersAction->getActionHTML('Delete user:','DELETEUSER',$conn,$sql);
-/*$result = $conn->query($sql);
-if ($result->num_rows > 0) {
-	$tableUsers='';
-	$datalistUser='<datalist id="CNP">';
-	$tab=new FancyTable(Array('Email','Last Name','Frist Name','CNP','Card(?)'));
-	while($row = $result->fetch_assoc()){
-		$datalistUser=$datalistUser."<option value=\"".$row['CNP']."\">";
-		
-		if($row['IDCard']!== NULL)
-			$card='Yes';
-		else
-			$card="X";
-		$tab->appendRow(Array($row['Email'],$row['Nume'],$row['Prenume'],$row['CNP'],$card));
-	}
-	$tableUsers=$tab->getTableHTML();
-	$datalistUser=$datalistUser."</datalist>";
-}*/
 
 // Make table with temporary held cards
 $sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana P ON C.IDCard =P.IDCard  WHERE P.IDUtilizator IS NULL";
 $cardAction=new ActionTable(Array('Card ID','Owner','Exp'),$tableKey='IDCard');
 $deleteCardForm=$cardAction->getActionHTML('Remove temporary Held Cards:','DELETECARD',$conn,$sql);
-/*$result = $conn->query($sql);
-if ($result->num_rows > 0) {
-	$orphanedCards='';
-	$datalistCard='<datalist id="IDCard">';
-	$tab=new FancyTable(Array("IDCard","Propietar","Exp"));
-	while($row = $result->fetch_assoc()){
-		$datalistCard=$datalistCard."<option value=".$row['IDCard'].">";
-		$tab->appendRow(Array($row['IDCard'],$row['Propietar'],$row['Exp']));
-	}
-	$datalistCard=$datalistCard."</datalist>";
-	$orphanedCards=$orphanedCards.$datalistCard.$tab->getTableHTML();
-	$deleteCardForm=<<<DELCARD
-	<form id="login-form-wrap" method="post">
-
-		<p>Remove temporary Held Cards: </p>
-		<input list="IDCard" name="IDCard">
-		${datalistCard}
-		<input type="submit" value="DELETECARD" id="ACTION" name="ACTION" class="button" >
-		${orphanedCards}
-	</form>
-DELCARD;
-}*/
 
 // Show how many users the application servers
 $sql = "SELECT COUNT(*) AS NumPers FROM Persoana";
