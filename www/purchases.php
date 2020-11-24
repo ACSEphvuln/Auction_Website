@@ -27,7 +27,7 @@ if ($stmt = $conn->prepare($query)) {
             $name="<a href=\"single-product.php?t=${phoneID}\">${phoneName}</a>";
             $pur->appendRow(Array($thumbnail,$name,$bill,$purchaseDate));
         }
-        $purchases=$pur->getHTML();
+        $purchases=$pur->getTableHTML();
     } else $purchases="<h1> No purchases yet. Ready to auction? </h1>";
     $stmt->close();
 } else error("Internal server error.");

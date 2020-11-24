@@ -36,10 +36,10 @@ function filter($input,$inputMaxLen,$filterType,$method="POST"){
 
 // Generate a new HTML table that will be returned as a string
 class FancyTable{
-  private $numcol;
-  private $tableColumns;
-  private $tableHeader;
-  private $numrows=0;
+  private $tableHeader; // Array containing strings of table columns names
+  private $numcol;      // Number of columns (count($tableHeader))
+  private $tableColumns;// Array of Arrays containing each column
+  private $numrows=0;   // Number of rows
 
   public function __construct($tableHeader){
     $this->tableHeader=$tableHeader;
@@ -54,18 +54,18 @@ class FancyTable{
       } else error("Invalid number of columns at FancyTable, given".count($row)." expecting ".$this->numcol);
   }
 
-  public function getHTML(){
+  public function getTableHTML(){
     $table='';
     $table=$table. '<table cellspacing="0" class="shop_table cart"><thead><tr>';
-    for ($i=0; $i <$this->numcol ; $i++) { 
+    for ($i=0; $i < $this->numcol ; $i++) { 
       $table=$table. '<th>'.$this->tableHeader[$i].'</th>';
     }
     $table=$table. '</tr></thead>';
 
     $table=$table. '<tbody>';
-    for ($i=0; $i <$this->numrows ; $i++) { 
+    for ($i=0; $i < $this->numrows ; $i++) { 
       $table=$table. '<tr>';
-      for ($j=0; $j <$this->numcol ; $j++) {
+      for ($j=0; $j < $this->numcol ; $j++) {
         $table=$table. '<td>'.$this->tableColumns[$i][$j].'</td>';
       }
       $table=$table. '</tr>';

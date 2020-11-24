@@ -9,12 +9,54 @@ if($_SESSION['idU']==1){
 // Reference db_connect connection to sql server
 global $conn;
 
+
+// FancyTable is located at common.php
+class ActionTable extends FancyTable{
+	private $tableKey;
+
+	public function __construct($tableHeader,$tableKey){
+	    parent::__construct($tableHeader);
+	    $this->tableKey=$tableKey;
+	}
+
+	public function getActionHTML($title,$action,$conn,$sql){
+		$tableKey=$this->tableKey;
+		$result = $conn->query($sql);
+		if ($result->num_rows > 0) {
+			$dataList='<datalist id="'.$tableKey.'">';
+			while($row = $result->fetch_assoc()){
+				$dataList=$dataList.'<option value="'.$row[$tableKey].'"">';
+				//$tableRow=Array();
+				//foreach ($columns as $c) {
+				//	$tableRow.push($row[$c]);
+				//}
+				//$this->appendRow($tableRow);
+				$this->appendRow(array_values($row));
+			}
+			$dataList=$dataList."</datalist>";
+			$table=$this->getTableHTML();
+			$form=<<<TABLEFORM
+			<form id="login-form-wrap" method="post">
+				<p>${title}</p>
+				<input list="${tableKey}" name="${tableKey}">
+				${dataList}
+				<input type="submit" value="${action}" id="ACTION" name="ACTION" class="button" >
+				${table}
+			</form>
+TABLEFORM;
+		}
+		return $form;
+	}
+
+}
+
+
 // Action performed on database
 if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 	// End a live auction by a supplied Phone Name
 	if($_POST['ACTION']=='ENDAUCTION'){
-		$phoneName=filter("auction",50,FILTER_SANITIZE_STRING);
+		$phoneName=filter("Nume",50,FILTER_SANITIZE_STRING);
 		$idUser=0;
 		$price=0;
 		$date="";
@@ -75,7 +117,6 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 		// Update the phone as sold
 		$query="UPDATE Telefon SET Vandut = True WHERE IDTelefon = ?";
 		if ($stmt = $conn->prepare($query)) {
-			//$stmt->bind_param("s",$phoneName);
 			$stmt->bind_param("s",$phoneID);
 			$stmt->execute();
 			$stmt->close();
@@ -108,7 +149,9 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 
 // Make a table with all the live auctions
 $sql = "SELECT  V.NumeFirma,T.Nume, T.PretInitial, T.DataLicitatie FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.Vandut = False AND T.DataLicitatie < NOW()";
-$result = $conn->query($sql);
+$auctionAction=new ActionTable(Array('Seller','Phone Name','Starting Price','Started at'),'Nume');
+$endAuctionForm=$auctionAction->getActionHTML('End and bill auctions:','ENDAUCTION',$conn,$sql);
+/*$result = $conn->query($sql);
 if ($result->num_rows > 0) {
 	$tableAuction='';
 	$datalist='<datalist id="auction">';
@@ -117,7 +160,7 @@ if ($result->num_rows > 0) {
 		$datalist=$datalist."<option value=\"".$row['Nume']."\">";
 		$tab->appendRow(Array($row['NumeFirma'],$row['Nume'],$row['PretInitial'],$row['DataLicitatie']));
 	}
-		$tableAuction=$tab->getHTML();
+		$tableAuction=$tab->getTableHTML();
 	$datalist=$datalist."</datalist>";
 
 	$endAuctionForm=<<<ENDAUCTIONFORM
@@ -130,11 +173,13 @@ if ($result->num_rows > 0) {
 		${tableAuction}
 	</form>
 ENDAUCTIONFORM;
-}
+}*/
 
 // Make a table with all users from Person Table
 $sql = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.IDCard  FROM Utilizator U INNER JOIN Persoana P ON U.IDUtilizator = P.IDUtilizator";
-$result = $conn->query($sql);
+$usersAction=new ActionTable(Array('Email','Last Name','Frist Name','CNP','Card ID'),'CNP');
+$deleteUserForm=$usersAction->getActionHTML('Delete user:','DELETEUSER',$conn,$sql);
+/*$result = $conn->query($sql);
 if ($result->num_rows > 0) {
 	$tableUsers='';
 	$datalistUser='<datalist id="CNP">';
@@ -148,13 +193,15 @@ if ($result->num_rows > 0) {
 			$card="X";
 		$tab->appendRow(Array($row['Email'],$row['Nume'],$row['Prenume'],$row['CNP'],$card));
 	}
-	$tableUsers=$tab->getHTML();
+	$tableUsers=$tab->getTableHTML();
 	$datalistUser=$datalistUser."</datalist>";
-}
+}*/
 
 // Make table with temporary held cards
 $sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana P ON C.IDCard =P.IDCard  WHERE P.IDUtilizator IS NULL";
-$result = $conn->query($sql);
+$cardAction=new ActionTable(Array('Card ID','Owner','Exp'),$tableKey='IDCard');
+$deleteCardForm=$cardAction->getActionHTML('Remove temporary Held Cards:','DELETECARD',$conn,$sql);
+/*$result = $conn->query($sql);
 if ($result->num_rows > 0) {
 	$orphanedCards='';
 	$datalistCard='<datalist id="IDCard">';
@@ -164,7 +211,7 @@ if ($result->num_rows > 0) {
 		$tab->appendRow(Array($row['IDCard'],$row['Propietar'],$row['Exp']));
 	}
 	$datalistCard=$datalistCard."</datalist>";
-	$orphanedCards=$orphanedCards.$datalistCard.$tab->getHTML();
+	$orphanedCards=$orphanedCards.$datalistCard.$tab->getTableHTML();
 	$deleteCardForm=<<<DELCARD
 	<form id="login-form-wrap" method="post">
 
@@ -175,7 +222,7 @@ if ($result->num_rows > 0) {
 		${orphanedCards}
 	</form>
 DELCARD;
-}
+}*/
 
 // Show how many users the application servers
 $sql = "SELECT COUNT(*) AS NumPers FROM Persoana";
@@ -205,13 +252,7 @@ Number of registered sellers: ${sellers} <br/>
 
 ${endAuctionForm}
 ${deleteCardForm}
-<form id="login-form-wrap" method="post">
-	<p>Delete user:</p>
-	<input list="CNP" name="CNP">
-	${datalistUser}
-	<input type="submit" value="DELETEUSER" id="ACTION" name="ACTION" class="button" >
-	${tableUsers}
-</form>
+${deleteUserForm}
 
 </center>
 BODY;
