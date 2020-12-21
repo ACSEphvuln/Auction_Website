@@ -43,24 +43,28 @@ TABLEFORM;
 		return $form;
 	}
 
+
+
+}
+class QueryTable extends FancyTable{
+
+	public function __construct($tableHeader){
+	    parent::__construct($tableHeader);
+	}
+
 	public function getQueryHTML($title,$conn,$sql){
-		$tableKey=$this->tableKey;
+
 		$result = $conn->query($sql);
 		if ($result->num_rows > 0) {
 			while($row = $result->fetch_assoc()){
 				$this->appendRow(array_values($row));
 			}
 			$table=$this->getTableHTML();
-			$form=<<<TABLE
-			<p>${title}</p>
-			${table}
-TABLE;
+			$form="<p>${title}</p>${table}";
 		}
 		return $form;
 	}
-
 }
-
 
 // Action performed on database
 if($_SERVER["REQUEST_METHOD"] == "POST"){
@@ -155,23 +159,18 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			$stmt->close();
 		} else error("Internal server error at delete.");
 		
+	} else if($_POST['ACTION']=='GIVEDISCOUNT'){
+		$companyName=filter("NumeFirma",50,FILTER_SANITIZE_STRING);
+
+		$query="UPDATE Telefon SET PretInitial=PretInitial*95/100 WHERE IDUtilizator=(SELECT IDUtilizator FROM Vanzator WHERE NumeFirma=?)";
+		if ($stmt = $conn->prepare($query)) {
+			$stmt->bind_param("s",$companyName);
+			$stmt->execute();
+			$stmt->close();
+		} else error("Internal server error at update.");
+
 	}
 }
-
-// Make a table with all the live auctions
-$sql = "SELECT  V.NumeFirma,T.Nume, T.PretInitial, T.DataLicitatie FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.Vandut = False AND T.DataLicitatie < NOW()";
-$auctionAction=new ActionTable(Array('Seller','Phone Name','Starting Price','Started at'),'Nume');
-$endAuctionForm=$auctionAction->getActionHTML('End and bill auctions:','ENDAUCTION',$conn,$sql);
-
-// Make a table with all users from Person Table
-$sql = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.IDCard  FROM Utilizator U INNER JOIN Persoana P ON U.IDUtilizator = P.IDUtilizator";
-$usersAction=new ActionTable(Array('Email','Last Name','Frist Name','CNP','Card ID'),'CNP');
-$deleteUserForm=$usersAction->getActionHTML('Delete user:','DELETEUSER',$conn,$sql);
-
-// Make table with temporary held cards
-$sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana P ON C.IDCard =P.IDCard  WHERE P.IDUtilizator IS NULL";
-$cardAction=new ActionTable(Array('Card ID','Owner','Exp'),$tableKey='IDCard');
-$deleteCardForm=$cardAction->getActionHTML('Remove temporary Held Cards:','DELETECARD',$conn,$sql);
 
 // Show how many users the application servers
 $sql = "SELECT COUNT(*) AS NumPers FROM Persoana";
@@ -189,7 +188,41 @@ if ($result->num_rows > 0) {
 	$sellers=$row["NumSel"];
 }
 
+// Make a table with all the live auctions
+$sql = "SELECT  V.NumeFirma,T.Nume, T.PretInitial, T.DataLicitatie FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.Vandut = False AND T.DataLicitatie < NOW()";
+$auctionAction=new ActionTable(Array('Seller','Phone Name','Starting Price','Started at'),'Nume');
+$endAuctionForm=$auctionAction->getActionHTML('End and bill auctions:','ENDAUCTION',$conn,$sql);
 
+// Make a table with all users from Person Table
+$sql = "SELECT U.Email, P.Nume, P.Prenume, P.CNP, P.IDCard  FROM Utilizator U INNER JOIN Persoana P ON U.IDUtilizator = P.IDUtilizator";
+$usersAction=new ActionTable(Array('Email','Last Name','Frist Name','CNP','Card ID'),'CNP');
+$deleteUserForm=$usersAction->getActionHTML('Delete user:','DELETEUSER',$conn,$sql);
+
+// Make table with temporary held cards
+$sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana P ON C.IDCard = P.IDCard  WHERE P.IDUtilizator IS NULL";
+$cardAction=new ActionTable(Array('Card ID','Owner','Exp'),$tableKey='IDCard');
+$deleteCardForm=$cardAction->getActionHTML('Remove temporary Held Cards:','DELETECARD',$conn,$sql);
+
+// Make table with all phones not currenty in sale for black-friday discount of initial price
+$sql = "SELECT V.NumeFirma, SUM(T.PretInitial)*5/100 FROM Vanzator V INNER JOIN Telefon T ON V.IDUtilizator=T.IDUtilizator GROUP BY NumeFirma";
+$discountAction=new ActionTable(Array('Company name','Total money that will be discounted:'),$tableKey='NumeFirma');
+$discountTable=$discountAction->getActionHTML('Give 5% initial-price discount for all phones of the company:','GIVEDISCOUNT',$conn,$sql);
+
+// Get users with expired cards
+$sql = "SELECT U.Email, P.Nume, P.Prenume FROM Persoana P INNER JOIN Utilizator U ON U.IDUtilizator=P.IDUtilizator  WHERE P.IDCard IN (SELECT IDCard FROM Card WHERE Exp < FORMAT(now(), 'yy-MM'))";
+$expiredCards=new QueryTable(Array('Email','Last Name', 'First Name'));
+$expiredCardsTable=$expiredCards->getQueryHTML('Users with expired cards:',$conn,$sql);
+
+// Get sellers with more than 3 sells
+$sql = "SELECT U.Email, V.NumeFirma FROM Vanzator V INNER JOIN Utilizator U ON U.IDUtilizator=V.IDUtilizator  WHERE V.IDUtilizator IN (SELECT IDUtilizator FROM Licitatie GROUP BY IDUtilizator HAVING COUNT(ALL IDTelefon) > 2)";
+$goodSellers=new QueryTable(Array('Email','Company Name'));
+$sellsTable=$goodSellers->getQueryHTML('Companies 2 or more sold phones:',$conn,$sql);
+
+
+// Get clients with more than 3 phones bought
+$sql = "SELECT U.Email, P.Nume, P.Prenume FROM Persoana P INNER JOIN Utilizator U ON U.IDUtilizator=P.IDUtilizator  WHERE P.IDUtilizator IN (SELECT IDUtilizator FROM Licitatie GROUP BY IDUtilizator HAVING COUNT(ALL IDTelefon) > 2";
+$goodBuyers=new QueryTable(Array('Email','Last Name', 'First Name'));
+$buysTable=$goodBuyers->getQueryHTML('Clients with phones bought:',$conn,$sql);
 
 
 echo $HEADER;
@@ -200,6 +233,11 @@ Number of registered users: ${buyers} <br/>
 Number of registered sellers: ${sellers} <br/>
 
 ${endAuctionForm}
+${sellsTable}
+${buysTable}
+${discountTable}
+
+${expiredCardsTable}
 ${deleteCardForm}
 ${deleteUserForm}
 
