@@ -14,6 +14,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
     if(!isset($_POST['idtelefon']))
         error("Internal Server Error at POST.");
     
+    // Check user has card
     $query= 'SELECT IDCard FROM Persoana WHERE IDUtilizator = ?';
     if ($stmt = $conn->prepare($query)) {
     $stmt->bind_param("s", $_SESSION['idU']);
@@ -27,6 +28,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
         $idt=filter("idtelefon",10,FILTER_SANITIZE_NUMBER_INT);
         $val=filter("valoare",14,FILTER_SANITIZE_NUMBER_INT);
 
+        // Check if provided auction is at least minium and that phone is under auction
         $query = "SELECT PretInitial FROM Telefon WHERE IDTelefon = ? AND DataLicitatie <= ?";
         if ($stmt = $conn->prepare($query)) {
         $stmt->bind_param("is",$idt,date("Y-m-d h:i:s"));
@@ -59,6 +61,7 @@ $id_tel=trim($_GET["t"]);
 $id_tel=filter_var($id_tel, FILTER_SANITIZE_NUMBER_INT);
 if (!filter_var($id_tel, FILTER_SANITIZE_NUMBER_INT)) 
     error("Internal Server Error.");
+// Show phone details
 $query = "SELECT T.*, V.NumeFirma FROM Telefon T INNER JOIN Vanzator V ON V.IDUtilizator = T.IDUtilizator INNER JOIN Utilizator U ON  V.IDUtilizator = U.IDUtilizator Where T.IDTelefon = ?";
 if ($stmt = $conn->prepare($query)) {
 $stmt->bind_param("i",$id_tel);
@@ -84,6 +87,7 @@ if ($result->num_rows > 0) {
         $idtel=$_GET['t'];
     else 
         $idtel=$_POST['idtelefon'];
+    // Show all auctions
     $idt ="./auction/".$idtel.".csv";
     if(file_exists($idt)){
         $auctionPannel='<li role="presentation"><a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Auctions</a></li>';
@@ -99,6 +103,7 @@ if ($result->num_rows > 0) {
     } else $auctionPannel='';
 
     if($sold){
+        // Show bought phone price
         $query = "SELECT PretLicitat FROM Licitatie WHERE IDTelefon = ?";
         if ($stmt = $conn->prepare($query)){
             $stmt->bind_param("i",$idtel);

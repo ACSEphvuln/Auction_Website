@@ -17,6 +17,7 @@ if ($result->num_rows > 0) {
     $phoneID=$row['IDTelefon'];
     $auctionDate=$row['DataLicitatie'];
 
+    // Sold phone 
     $auctionStatus='';
     if($row["Vandut"])
         $price = "SOLD";
