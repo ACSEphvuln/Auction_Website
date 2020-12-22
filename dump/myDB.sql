@@ -71,7 +71,7 @@ CREATE TABLE `Telefon` (
 	`Vandut` BOOL DEFAULT False,
 	
 	PRIMARY KEY (`IDTelefon`),
-	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`)
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Vanzator(`IDUtilizator`)
 );
 
 #-- Tabela Licitatii ( Utilizator N:N Telefon)
@@ -83,7 +83,7 @@ CREATE TABLE `Licitatie` (
 	`DataLicitatie` DATETIME DEFAULT NOW(),
 	
 	PRIMARY KEY (`IDLicitatie`),
-	FOREIGN KEY (`IDUtilizator`) REFERENCES Utilizator(`IDUtilizator`) ON DELETE SET NULL,
+	FOREIGN KEY (`IDUtilizator`) REFERENCES Persoana(`IDUtilizator`) ON DELETE SET NULL,
 	FOREIGN KEY (`IDTelefon`) REFERENCES Telefon(`IDTelefon`)
 );
 #-- IDUtilizator = Cumparator

@@ -141,7 +141,7 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 	} else if($_POST['ACTION']=='DELETEUSER'){
 		$CNP=filter("CNP",13,FILTER_SANITIZE_STRING);
 
-		$query="DELETE FROM Utilizator WHERE IDUtilizator IN (SELECT * FROM (SELECT IDUtilizator FROM Persoana WHERE CNP = ?) AS P)";
+		$query="DELETE FROM Utilizator WHERE IDUtilizator = (SELECT IDUtilizator FROM Persoana WHERE CNP = ?)";
 		if ($stmt = $conn->prepare($query)) {
 			$stmt->bind_param("s",$CNP);
 			$stmt->execute();
@@ -158,7 +158,8 @@ if($_SERVER["REQUEST_METHOD"] == "POST"){
 			$stmt->execute();
 			$stmt->close();
 		} else error("Internal server error at delete.");
-		
+	
+	// Give discount
 	} else if($_POST['ACTION']=='GIVEDISCOUNT'){
 		$companyName=filter("NumeFirma",50,FILTER_SANITIZE_STRING);
 
@@ -203,7 +204,7 @@ $sql = "SELECT C.IDCard, C.Propietar, C.Exp FROM Card C LEFT OUTER JOIN Persoana
 $cardAction=new ActionTable(Array('Card ID','Owner','Exp'),$tableKey='IDCard');
 $deleteCardForm=$cardAction->getActionHTML('Remove temporary Held Cards:','DELETECARD',$conn,$sql);
 
-// Make table with all phones not currenty in sale for black-friday discount of initial price
+// Make table for discounts for all the stock of a seller
 $sql = "SELECT V.NumeFirma, SUM(T.PretInitial)*5/100 FROM Vanzator V INNER JOIN Telefon T ON V.IDUtilizator=T.IDUtilizator GROUP BY NumeFirma";
 $discountAction=new ActionTable(Array('Company name','Total money that will be discounted:'),$tableKey='NumeFirma');
 $discountTable=$discountAction->getActionHTML('Give 5% initial-price discount for all phones of the company:','GIVEDISCOUNT',$conn,$sql);
@@ -213,16 +214,16 @@ $sql = "SELECT U.Email, P.Nume, P.Prenume FROM Persoana P INNER JOIN Utilizator 
 $expiredCards=new QueryTable(Array('Email','Last Name', 'First Name'));
 $expiredCardsTable=$expiredCards->getQueryHTML('Users with expired cards:',$conn,$sql);
 
-// Get sellers with more than 3 sells
-$sql = "SELECT U.Email, V.NumeFirma FROM Vanzator V INNER JOIN Utilizator U ON U.IDUtilizator=V.IDUtilizator  WHERE V.IDUtilizator IN (SELECT IDUtilizator FROM Licitatie GROUP BY IDUtilizator HAVING COUNT(ALL IDTelefon) > 2)";
+// Get sellers with more than 2 recorded sells
+$sql = "SELECT U.Email, V.NumeFirma FROM Vanzator V INNER JOIN Utilizator U ON U.IDUtilizator=V.IDUtilizator  WHERE V.IDUtilizator IN (SELECT T.IDUtilizator FROM Telefon T INNER JOIN Licitatie L ON L.IDTelefon = T.IDTelefon GROUP BY T.IDUtilizator HAVING COUNT(L.IDLicitatie)>2)";
 $goodSellers=new QueryTable(Array('Email','Company Name'));
 $sellsTable=$goodSellers->getQueryHTML('Companies 2 or more sold phones:',$conn,$sql);
 
 
-// Get clients with more than 3 phones bought
-$sql = "SELECT U.Email, P.Nume, P.Prenume FROM Persoana P INNER JOIN Utilizator U ON U.IDUtilizator=P.IDUtilizator  WHERE P.IDUtilizator IN (SELECT IDUtilizator FROM Licitatie GROUP BY IDUtilizator HAVING COUNT(ALL IDTelefon) > 2";
-$goodBuyers=new QueryTable(Array('Email','Last Name', 'First Name'));
-$buysTable=$goodBuyers->getQueryHTML('Clients with phones bought:',$conn,$sql);
+// Users that bought phones released from last year to present
+$sql = "SELECT DISTINCT CONCAT(P.Nume, ' ', P.Prenume) AS NumeUtilizator FROM Persoana P INNER JOIN Licitatie L ON P.IDUtilizator = L.IDUtilizator WHERE L.IDTelefon = ANY (SELECT T.IDTelefon FROM Telefon T WHERE T.AnAparitie >= YEAR(now())-1)";
+$goodBuyers=new QueryTable(Array('Users that bought phones released from last year to present'));
+$buysTable=$goodBuyers->getQueryHTML('Top active users',$conn,$sql);
 
 
 echo $HEADER;
