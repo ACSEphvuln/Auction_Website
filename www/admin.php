@@ -226,6 +226,13 @@ $goodBuyers=new QueryTable(Array('Users that bought phones released from last ye
 $buysTable=$goodBuyers->getQueryHTML('Top active users',$conn,$sql);
 
 
+
+// Sellers and number of phones on sale
+$sql = "SELECT V.NumeFirma,(SELECT COUNT(IDUtilizator) FROM Telefon T WHERE T.IDUtilizator = V.IDUtilizator) FROM Vanzator V";
+$numberSell=new QueryTable(Array('Seller','Number of phones to sell'));
+$numselTable=$numberSell->getQueryHTML('Sellers/Number of phones in sale',$conn,$sql);
+
+
 echo $HEADER;
 echo printHeader("Administrative pannel");
 echo <<<BODY
@@ -241,6 +248,7 @@ ${discountTable}
 ${expiredCardsTable}
 ${deleteCardForm}
 ${deleteUserForm}
+${numselTable}
 
 </center>
 BODY;
