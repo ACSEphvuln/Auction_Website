@@ -210,7 +210,7 @@ $discountAction=new ActionTable(Array('Company name','Total money that will be d
 $discountTable=$discountAction->getActionHTML('Give 5% initial-price discount for all phones of the company:','GIVEDISCOUNT',$conn,$sql);
 
 // Get users with expired cards
-$sql = "SELECT U.Email, P.Nume, P.Prenume FROM Persoana P INNER JOIN Utilizator U ON U.IDUtilizator=P.IDUtilizator  WHERE P.IDCard IN (SELECT IDCard FROM Card WHERE Exp < FORMAT(now(), 'yy-MM'))";
+$sql = "SELECT U.Email, P.Nume, P.Prenume FROM Persoana P INNER JOIN Utilizator U ON U.IDUtilizator=P.IDUtilizator  WHERE P.IDCard IN (SELECT IDCard FROM Card WHERE Exp < DATE_FORMAT(now(), '%y-%m'))";
 $expiredCards=new QueryTable(Array('Email','Last Name', 'First Name'));
 $expiredCardsTable=$expiredCards->getQueryHTML('Users with expired cards:',$conn,$sql);
 
@@ -228,7 +228,7 @@ $buysTable=$goodBuyers->getQueryHTML('Top active users',$conn,$sql);
 
 
 // Sellers and number of phones on sale
-$sql = "SELECT V.NumeFirma,(SELECT COUNT(IDUtilizator) FROM Telefon T WHERE T.IDUtilizator = V.IDUtilizator) FROM Vanzator V";
+$sql = "SELECT V.NumeFirma,(SELECT COUNT(IDUtilizator) FROM Telefon T WHERE T.IDUtilizator = V.IDUtilizator) AS NrTel FROM Vanzator V";
 $numberSell=new QueryTable(Array('Seller','Number of phones to sell'));
 $numselTable=$numberSell->getQueryHTML('Sellers/Number of phones in sale',$conn,$sql);
 
