@@ -1,9 +1,12 @@
-#Proiect BD
+# Proiect BD
 
-Tema proiect: Evidenta licitatii online pentru telefoane mobile
+Application ports:
+- 8000 - apache
+- 8081 - myphpadmin
 
-Todo:
-install phpMyAdmin
 
-Template:
+To run the application: ./app.sh up
+To close the application: ./app.sh down
+
+Template used for HTTP, CSS & JavaScript:
 https://github.com/jairandresdiazp/EcomerceTemplate
